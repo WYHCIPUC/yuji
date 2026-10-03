@@ -1,0 +1,35 @@
+@media (max-width: 760px) {
+  .topbar, .experience { width: calc(100% - 32px); }
+  .topbar { padding: 20px 0; }
+  .eyebrow { display: none; }
+  .topbar-meta { gap: 0; }
+  .intro-screen { min-height: calc(100vh - 68px); padding: 30px 18px 80px; }
+  .mobile-only { display: block; }
+  .intro-screen h1 { font-size: clamp(48px, 15vw, 76px); }
+  .intro-copy { font-size: 16px; }
+  .scene-header { display: block; margin-bottom: 20px; }
+  .scene-header h2 { font-size: 32px; }
+  .scene-actions { margin-top: 20px; }
+  .map-stage { min-height: 320px; border-radius: 7px; }
+  .map-svg { min-height: 320px; }
+  .map-svg text { font-size: 11px; }
+  .map-annotation { font-size: 10px; }
+  .map-annotation small { display: none; }
+  .annotation-1 { left: 7%; top: 18%; }
+  .annotation-2 { right: 7%; bottom: 23%; }
+  .map-stamp { left: 16px; bottom: 18px; font-size: 9px; }
+  .compare-button { right: 16px; bottom: 16px; padding: 10px 12px; font-size: 12px; }
+  .timeline-wrap { padding: 26px 4px 0; margin-inline: -4px; overflow-x: auto; overflow-y: visible; scrollbar-width: none; }
+  .timeline-wrap::-webkit-scrollbar { display: none; }
+  .timeline-heading { align-items: flex-start; flex-direction: column; gap: 6px; }
+  .timeline { min-width: 520px; }
+  .bottom-grid { grid-template-columns: 1fr; margin-top: 34px; }
+  .story-card, .model-card { min-height: auto; padding: 18px; }
+  .story-content { gap: 14px; margin-top: 18px; }
+  .story-avatar { width: 42px; height: 42px; font-size: 17px; }
+  .story-content h3 { font-size: 18px; }
+  .story-content p { font-size: 13px; }
+  .overlay-control { padding: 12px; }
+  .overlay-panel { padding: 22px 18px; }
+  .search-drawer .drawer-inner, .sources-drawer .drawer-inner { padding: 26px 18px; }
+}

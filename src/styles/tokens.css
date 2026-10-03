@@ -1,0 +1,17 @@
+:root {
+  --ink: #171614;
+  --ink-soft: #24211d;
+  --paper: #d8c29a;
+  --paper-light: #efe3c8;
+  --mist: #9ca49a;
+  --text: #f0e8d7;
+  --muted: #b9b1a3;
+  --muted-dark: #766f62;
+  --vermilion: #b54832;
+  --gold: #c5a45b;
+  --sage: #88a79b;
+  --line: rgba(240, 232, 215, .16);
+  --line-strong: rgba(240, 232, 215, .32);
+  --shadow: 0 18px 70px rgba(0, 0, 0, .28);
+  --ease: cubic-bezier(.2, .8, .2, 1);
+}

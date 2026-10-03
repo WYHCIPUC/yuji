@@ -1,0 +1,20 @@
+{
+  "name": "yuji-timeline-prototype",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "serve:local": "vite preview --host 127.0.0.1 --port 4173",
+    "verify": "node scripts/verify-prototype.mjs",
+    "smoke": "node scripts/smoke.mjs",
+    "check": "npm run build && npm run verify && npm run smoke"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.63.0",
+    "typescript": "^5.6.3",
+    "vite": "^6.0.5"
+  }
+}
