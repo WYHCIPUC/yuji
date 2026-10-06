@@ -23,7 +23,7 @@ if (existsSync(indexPath)) {
 
   const resources = [...html.matchAll(/(?:src|href)="([^"]+)"/g)]
     .map((match) => match[1])
-    .filter((resource) => resource.startsWith('./') || resource.startsWith('assets/'));
+    .filter((resource) => !resource.startsWith('/') && !/^(https?:)?\/\//.test(resource));
 
   resources.forEach((resource) => {
     const relativePath = resource.replace(/^\.\//, '');
