@@ -66,8 +66,12 @@ button:focus-visible, input:focus-visible, [tabindex]:focus-visible { outline: 2
 .constellation { opacity: 0; transition: opacity 1s var(--ease); }
 .constellation circle { fill: var(--paper-light); }
 .constellation path { fill: none; stroke: rgba(240,232,215,.32); stroke-width: 1; }
-.place-dots circle { fill: var(--vermilion); opacity: .75; }
-.map-place-labels text { font-size: 13px; }
+.map-place { cursor: pointer; transition: opacity 1s var(--ease); }
+.map-place .place-hit { fill: transparent; pointer-events: all; }
+.map-place .place-dot { fill: var(--vermilion); opacity: .75; transition: opacity .2s ease; }
+.map-place .place-label { font-size: 13px; transition: fill .2s ease; }
+.map-place:hover .place-dot, .map-place:focus-visible .place-dot { opacity: 1; }
+.map-place:hover .place-label, .map-place:focus-visible .place-label { fill: var(--paper-light); }
 .ancient-overlay { opacity: .55; mix-blend-mode: multiply; transition: opacity .35s ease; pointer-events: none; }
 .overlay-brush { fill: none; stroke: rgba(121, 68, 39, .35); stroke-width: 12; }
 .overlay-grid { fill: none; stroke: rgba(181, 72, 50, .3); stroke-width: 1; stroke-dasharray: 2 7; }
@@ -75,20 +79,19 @@ button:focus-visible, input:focus-visible, [tabindex]:focus-visible { outline: 2
 .app-shell[data-era="shangzhou"] .grid-lines { opacity: .28; }
 .app-shell[data-era="shangzhou"] .territory { opacity: .14; }
 .app-shell[data-era="shangzhou"] .river { opacity: .26; }
-.app-shell[data-era="shangzhou"] .map-place-labels { opacity: .12; }
-.app-shell[data-era="shangzhou"] .place-dots { opacity: .18; }
+.app-shell[data-era="shangzhou"] .map-place { opacity: .15; }
 .app-shell[data-era="shangzhou"] .ancient-overlay { opacity: .12; }
 .app-shell[data-era="yujitu"] .grid-lines { opacity: .86; }
 .app-shell[data-era="yujitu"] .territory { opacity: .25; }
 .app-shell[data-era="yujitu"] .river { opacity: .84; }
-.app-shell[data-era="yujitu"] .map-place-labels { opacity: .76; }
+.app-shell[data-era="yujitu"] .map-place { opacity: .8; }
 .app-shell[data-era="yujitu"] .ancient-overlay { opacity: .58; }
 .app-shell[data-era="kunyu"] .grid-lines { opacity: .56; }
 .app-shell[data-era="kunyu"] .territory { opacity: .3; }
 .app-shell[data-era="kunyu"] .river { opacity: .9; }
 .app-shell[data-era="kunyu"] .river-future { opacity: .88; stroke-dashoffset: 0; }
 .app-shell[data-era="kunyu"] .constellation { opacity: .82; }
-.app-shell[data-era="kunyu"] .map-place-labels { opacity: .92; }
+.app-shell[data-era="kunyu"] .map-place { opacity: .92; }
 .app-shell[data-era="kunyu"] .ancient-overlay { opacity: .38; }
 .map-label-north { position: absolute; top: 26px; right: 32px; color: var(--muted-dark); font-size: 12px; }
 .map-annotation { position: absolute; display: flex; gap: 8px; align-items: baseline; color: var(--muted); font-size: 12px; }

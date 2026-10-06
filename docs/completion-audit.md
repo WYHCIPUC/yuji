@@ -43,3 +43,17 @@
 ## 审计结论
 
 本地 MVP 的代码、内容结构、测试和发布准备已经完成。真实用户验证、正式古图版权核验和线上发布仍属于外部步骤，不能用自动化测试替代。
+
+## 增量记录：v0.1.1（2026-10-06）
+
+在不改变冻结范围的前提下完成的迭代，全部有本地验证证据（`npm run check`，28 项冒烟检查通过）：
+
+| 增量 | 说明 | 证据 |
+|---|---|---|
+| 地图地名点按反查 | 示意地图上的地名变为可交互元素，点按或 Enter 即打开查询抽屉并展示该地考订卡 | `src/main.ts` 的 `mapPlaces` 与 `.map-place` 交互、冒烟测试 3 项新用例 |
+| 内容数据校验 | 新增 `scripts/lint-content.mjs`，校验四份内容 JSON 的必填字段、称谓链、确定性分级和地图地名可查性，已接入 `npm run verify` | `scripts/lint-content.mjs`、`package.json` |
+| 无障碍小修 | 时间轴 `aria-valuemax` 从时代数据派生，不再硬编码；地图地名带 `role="button"` 和键盘触发 | `src/main.ts` |
+| 一键验收脚本 | `npm run check` 串起构建、校验、临时预览与浏览器冒烟测试 | `scripts/check.mjs`、`scripts/smoke.mjs`（Edge 持久化上下文） |
+| 发布包 | 重新构建 `release/yuji-prototype-0.1.1-dist.zip` | `release/` |
+
+仍待外部输入的事项与上表下方主审计一致：真实用户试用、GitHub 仓库地址、正式古图版权核验。

@@ -9,6 +9,14 @@ import './styles/responsive.css';
 type Era = (typeof eras)[number];
 type Place = (typeof places)[number];
 
+// 示意地图上的可点按地名；名字必须能在 places.json 中查到（由 scripts/lint-content.mjs 校验）。
+const mapPlaces = [
+  { name: '洛阳', x: 454, y: 238 },
+  { name: '建康', x: 520, y: 280 },
+  { name: '临安', x: 600, y: 315 },
+  { name: '燕京', x: 715, y: 260 },
+];
+
 const app = document.querySelector<HTMLDivElement>('#app');
 if (!app) throw new Error('App root not found');
 
@@ -71,21 +79,20 @@ app.innerHTML = `
               <path class="river river-yangtze" d="M195 300 C295 278 370 330 455 318 C545 305 604 350 680 337 C745 326 784 286 850 305"/>
               <path class="river river-future" d="M620 95 C690 150 718 188 720 235 C721 280 790 320 862 394"/>
               <g class="constellation"><circle cx="250" cy="160" r="4"/><circle cx="345" cy="118" r="3"/><circle cx="438" cy="110" r="4"/><circle cx="760" cy="130" r="3"/><path d="M250 160L345 118L438 110 M438 110L760 130"/></g>
-              <g class="place-dots"><circle cx="454" cy="238" r="7"/><circle cx="520" cy="280" r="7"/><circle cx="600" cy="315" r="7"/><circle cx="715" cy="260" r="7"/></g>
-              <g class="map-place-labels"><text x="438" y="224">洛阳</text><text x="503" y="269">建康</text><text x="582" y="305">临安</text><text x="700" y="250">燕京</text></g>
+              <g class="map-places">${mapPlaces.map((place) => `<g class="map-place" data-place="${place.name}" role="button" tabindex="0" aria-label="查询地名：${place.name}"><circle class="place-hit" cx="${place.x}" cy="${place.y}" r="17"/><circle class="place-dot" cx="${place.x}" cy="${place.y}" r="7"/><text class="place-label" x="${place.x - 16}" y="${place.y - 14}">${place.name}</text></g>`).join('')}</g>
               <g class="ancient-overlay" id="ancient-overlay"><rect x="86" y="42" width="828" height="500" fill="url(#paper-gradient)"/><path d="M142 140 Q310 62 480 142 T860 128 M110 360 Q270 280 450 370 T900 340" class="overlay-brush"/><path d="M170 100V480 M280 74V500 M390 72V500 M500 72V500 M610 72V500 M720 72V500 M830 72V500" class="overlay-grid"/><text x="150" y="115" class="overlay-title">禹迹示意叠层</text></g>
             </g>
             <rect x="86" y="42" width="828" height="500" rx="8" class="map-frame"/>
           </svg>
           <div class="map-annotation annotation-1"><span></span><strong>河流</strong><small>随时代逐渐清晰</small></div>
-          <div class="map-annotation annotation-2"><span></span><strong>地名</strong><small>点墨般浮现</small></div>
+          <div class="map-annotation annotation-2"><span></span><strong>地名</strong><small>点墨浮现 · 点按查前世</small></div>
           <div class="map-stamp">示意重绘<br />不代表现实边界</div>
           <button class="compare-button" id="compare-button"><span class="compare-icon">◐</span><span>掀开古今对照</span></button>
         </div>
 
         <div class="timeline-wrap">
           <div class="timeline-heading"><span>时间轴</span><span class="timeline-hint" id="timeline-hint">向右拖动，观察世界变得可测</span></div>
-          <div class="timeline" id="timeline" role="slider" aria-label="时代时间轴" aria-valuemin="0" aria-valuemax="2" aria-valuenow="${currentEra}" tabindex="0">
+          <div class="timeline" id="timeline" role="slider" aria-label="时代时间轴" aria-valuemin="0" aria-valuemax="${eras.length - 1}" aria-valuenow="${currentEra}" tabindex="0">
             <div class="timeline-track"><div class="timeline-progress" id="timeline-progress"></div></div>
             ${eras.map((era, index) => `<button class="timeline-node ${index === currentEra ? 'is-active' : ''}" data-index="${index}" style="--node-accent:${era.accent}" aria-label="${era.year}：${era.title}"><span class="node-dot"></span><span class="node-year">${era.year}</span><span class="node-caption">${era.shortYear}</span></button>`).join('')}
           </div>
@@ -180,6 +187,16 @@ document.querySelector<HTMLButtonElement>('#open-sources')!.addEventListener('cl
 document.querySelector<HTMLButtonElement>('#close-sources')!.addEventListener('click', () => setDrawer(sourcesDrawer, false));
 placeSearch.addEventListener('input', () => { searchTerm = placeSearch.value; renderResults(searchTerm); });
 searchSuggestions.addEventListener('click', (event) => { const target = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-place]'); if (!target) return; placeSearch.value = target.dataset.place ?? ''; placeSearch.dispatchEvent(new Event('input')); });
+document.querySelectorAll<SVGGElement>('.map-place').forEach((node) => {
+  const lookup = () => {
+    setDrawer(searchDrawer, true);
+    placeSearch.value = node.dataset.place ?? '';
+    placeSearch.dispatchEvent(new Event('input'));
+    placeSearch.focus();
+  };
+  node.addEventListener('click', lookup);
+  node.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); lookup(); } });
+});
 document.querySelectorAll<HTMLButtonElement>('.timeline-node').forEach((node) => node.addEventListener('click', () => { renderEra(Number(node.dataset.index)); if (!hasStarted) startExperience(); }));
 document.querySelector<HTMLButtonElement>('#toggle-play')!.addEventListener('click', (event) => {
   const button = event.currentTarget as HTMLButtonElement;

@@ -44,6 +44,15 @@ try {
   check(await page.locator('.place-result').count() > 0, '地名卡已渲染');
   await page.locator('#close-search').click();
 
+  await page.locator('.map-place[data-place="燕京"]').click();
+  check(await page.locator('#search-drawer').evaluate((node) => node.classList.contains('is-open')), '点按地图地名可以打开查询抽屉');
+  check((await page.locator('.place-result').first().textContent()).includes('北京'), '地图地名点按返回今地对应');
+  await page.locator('#close-search').click();
+  await page.locator('.map-place[data-place="临安"]').focus();
+  await page.keyboard.press('Enter');
+  check((await page.locator('#place-search').inputValue()) === '临安', '键盘 Enter 可以用地图地名发起查询');
+  await page.locator('#close-search').click();
+
   await page.locator('.model-tab[data-model="郡县"]').click();
   check((await page.locator('#model-copy').textContent()).includes('管理'), '天下模型切换后说明更新');
 

@@ -12,7 +12,7 @@
 - 商周、1136 年、1602 年三个时代；
 - 一个古图叠层示意；
 - 朱思本制图者卡片；
-- 20 条地名数据；
+- 20 条地名数据，支持搜索和地图地名点按反查；
 - 五服、郡县两个天下模型；
 - 来源与说明抽屉；
 - 移动端和电脑端响应式布局。
@@ -52,7 +52,7 @@ npm run preview
 npm run verify
 ```
 
-这个检查会确认构建入口、脚本、样式和核心内容数据都已生成。项目已经附带 GitHub Pages 工作流文件：将目录放入 GitHub 仓库并推送到 `main` 分支后，GitHub Actions 会自动构建和发布 `dist/`。
+这个检查会先校验内容数据结构（必填字段、称谓链、确定性分级、地图地名可查询），再确认构建入口、脚本、样式和核心内容数据都已生成。项目已经附带 GitHub Pages 工作流文件：将目录放入 GitHub 仓库并推送到 `main` 分支后，GitHub Actions 会自动构建和发布 `dist/`。
 
 ## 浏览器冒烟测试
 
@@ -89,7 +89,7 @@ npm run smoke
 
 本地部署可以直接照着 [docs/local-deployment.md](docs/local-deployment.md) 执行。
 
-构建后的静态发布包位于 [release/yuji-prototype-0.1.0-dist.zip](release/yuji-prototype-0.1.0-dist.zip)，解压后可直接上传到静态托管服务。
+构建后的静态发布包位于 [release/yuji-prototype-0.1.1-dist.zip](release/yuji-prototype-0.1.1-dist.zip)，解压后可直接上传到静态托管服务。
 
 ## 连接 GitHub 并发布
 
