@@ -26,11 +26,15 @@ try {
   await page.locator('.timeline-node[data-index="1"]').click();
   check(await page.locator('.app-shell').getAttribute('data-era') === 'yujitu', '点击 1136 年后时代状态正确');
   check((await page.locator('#era-title').textContent()).includes('格子'), '时代标题已更新');
+  check((await page.locator('#overlay-image').getAttribute('href')).includes('yujitu'), '1136 年叠层加载《禹迹图》原图');
+  check(await page.evaluate(() => fetch('assets/maps/yujitu-befeo-1903.jpg', { method: 'HEAD' }).then((response) => response.status)) === 200, '《禹迹图》素材文件可访问');
 
   const timeline = page.locator('#timeline');
   const bounds = await timeline.boundingBox();
   if (bounds) await page.mouse.click(bounds.x + bounds.width - 8, bounds.y + bounds.height / 2);
   check(await page.locator('.app-shell').getAttribute('data-era') === 'kunyu', '拖动/点击时间轴末端后进入 1602 年');
+  check((await page.locator('#overlay-image').getAttribute('href')).includes('kunyu'), '1602 年叠层加载《坤舆万国全图》原图');
+  check(await page.locator('#ancient-overlay').evaluate((node) => !node.classList.contains('is-off')), '有古图时代的叠层未被隐藏');
 
   await page.locator('#compare-button').click();
   check(await page.locator('#overlay-control').evaluate((node) => node.classList.contains('is-open')), '古今对照面板打开');

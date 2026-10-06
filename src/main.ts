@@ -17,6 +17,12 @@ const mapPlaces = [
   { name: '燕京', x: 715, y: 260 },
 ];
 
+// 真实古图层：已核验公有领域素材（许可与出处见 NOTICE.md 和来源抽屉），素材文件由 scripts/lint-content.mjs 校验存在。
+const eraOverlayImage: Record<string, { src: string; caption: string; x: number; y: number; w: number; h: number; cx: number; cy: number }> = {
+  yujitu: { src: 'assets/maps/yujitu-befeo-1903.jpg', caption: '《禹迹图》沙畹摹绘本 · 1903 · 公有领域', x: 130, y: 62, w: 391, h: 440, cx: 130, cy: 524 },
+  kunyu: { src: 'assets/maps/kunyu-wanguo-1602.jpg', caption: '《坤舆万国全图》 · 1602 · 公有领域', x: 150, y: 118, w: 730, h: 328, cx: 150, cy: 472 },
+};
+
 const app = document.querySelector<HTMLDivElement>('#app');
 if (!app) throw new Error('App root not found');
 
@@ -31,7 +37,7 @@ app.innerHTML = `
     <div class="grain" aria-hidden="true"></div>
     <header class="topbar">
       <a class="brand" href="#" aria-label="禹迹首页"><span class="brand-mark">禹</span><span>禹迹</span></a>
-      <div class="topbar-meta"><span class="eyebrow">历史地理交互叙事 · 原型 0.1</span><button class="text-button" id="open-sources">来源与说明</button></div>
+      <div class="topbar-meta"><span class="eyebrow">历史地理交互叙事 · 原型 0.2</span><button class="text-button" id="open-sources">来源与说明</button></div>
     </header>
 
     <main>
@@ -80,7 +86,7 @@ app.innerHTML = `
               <path class="river river-future" d="M620 95 C690 150 718 188 720 235 C721 280 790 320 862 394"/>
               <g class="constellation"><circle cx="250" cy="160" r="4"/><circle cx="345" cy="118" r="3"/><circle cx="438" cy="110" r="4"/><circle cx="760" cy="130" r="3"/><path d="M250 160L345 118L438 110 M438 110L760 130"/></g>
               <g class="map-places">${mapPlaces.map((place) => `<g class="map-place" data-place="${place.name}" role="button" tabindex="0" aria-label="查询地名：${place.name}"><circle class="place-hit" cx="${place.x}" cy="${place.y}" r="17"/><circle class="place-dot" cx="${place.x}" cy="${place.y}" r="7"/><text class="place-label" x="${place.x - 16}" y="${place.y - 14}">${place.name}</text></g>`).join('')}</g>
-              <g class="ancient-overlay" id="ancient-overlay"><rect x="86" y="42" width="828" height="500" fill="url(#paper-gradient)"/><path d="M142 140 Q310 62 480 142 T860 128 M110 360 Q270 280 450 370 T900 340" class="overlay-brush"/><path d="M170 100V480 M280 74V500 M390 72V500 M500 72V500 M610 72V500 M720 72V500 M830 72V500" class="overlay-grid"/><text x="150" y="115" class="overlay-title">禹迹示意叠层</text></g>
+              <g class="ancient-overlay" id="ancient-overlay"><g class="overlay-real"><image id="overlay-image" class="overlay-image" x="130" y="62" width="391" height="440" preserveAspectRatio="xMidYMid meet" href="assets/maps/yujitu-befeo-1903.jpg"/><text id="overlay-caption" x="130" y="524" class="overlay-caption">《禹迹图》沙畹摹绘本 · 1903 · 公有领域</text></g></g>
             </g>
             <rect x="86" y="42" width="828" height="500" rx="8" class="map-frame"/>
           </svg>
@@ -108,7 +114,7 @@ app.innerHTML = `
       </section>
     </main>
 
-    <div class="overlay-control" id="overlay-control" aria-hidden="true"><div class="overlay-panel"><div class="panel-heading"><div><p class="card-label">古今叠层</p><h3>拖动滑杆，掀开一张古图</h3></div><button class="close-button" id="close-overlay" aria-label="关闭古今叠层">×</button></div><p>古图叠层为预配准示意。差异会受到比例、投影和控制点选择影响。</p><label for="opacity-range">古图透明度 <output id="opacity-output">55%</output></label><input id="opacity-range" type="range" min="0" max="100" value="55"/><div class="panel-foot"><span>现代灰模</span><span>古图纸色</span></div></div></div>
+    <div class="overlay-control" id="overlay-control" aria-hidden="true"><div class="overlay-panel"><div class="panel-heading"><div><p class="card-label">古今叠层</p><h3>拖动滑杆，掀开一张古图</h3></div><button class="close-button" id="close-overlay" aria-label="关闭古今叠层">×</button></div><p>古图为已核验的公版原图，与今图未做严格配准，仅作视觉叠合；方位与比例的真实差异本身就是历史。</p><label for="opacity-range">古图透明度 <output id="opacity-output">55%</output></label><input id="opacity-range" type="range" min="0" max="100" value="55"/><div class="panel-foot"><span>现代灰模</span><span>古图纸色</span></div></div></div>
 
     <div class="search-drawer" id="search-drawer" aria-hidden="true"><div class="drawer-inner"><div class="panel-heading"><div><p class="card-label">名物对照</p><h3>查一个地名的前世</h3></div><button class="close-button" id="close-search" aria-label="关闭地名查询">×</button></div><label class="search-field"><span>输入古今名称</span><input id="place-search" type="search" placeholder="例如：燕京 / 北京" autocomplete="off"/><span class="search-key">⌘ K</span></label><div class="search-suggestions" id="search-suggestions"></div><div class="search-results" id="search-results"></div></div></div>
 
@@ -126,6 +132,13 @@ const eraSource = document.querySelector<HTMLElement>('#era-source')!;
 const progress = document.querySelector<HTMLElement>('#timeline-progress')!;
 const timeline = document.querySelector<HTMLElement>('#timeline')!;
 const ancientOverlay = document.querySelector<HTMLElement>('#ancient-overlay')!;
+const overlayImage = document.querySelector<SVGImageElement>('#overlay-image')!;
+const overlayCaption = document.querySelector<SVGTextElement>('#overlay-caption')!;
+
+function eraOverlayFactor(index: number): number {
+  // 真实古图默认半掩，保证底图可读；掀开对照时才加浓。商周是想象时代，没有古图。
+  return index === 0 ? 0 : index === 1 ? 0.55 : 0.4;
+}
 const overlayControl = document.querySelector<HTMLElement>('#overlay-control')!;
 const searchDrawer = document.querySelector<HTMLElement>('#search-drawer')!;
 const sourcesDrawer = document.querySelector<HTMLElement>('#sources-drawer')!;
@@ -141,8 +154,21 @@ function renderEra(index: number) {
   description.textContent = era.description;
   shortYear.textContent = era.shortYear;
   eraSource.textContent = `内容状态：${era.certainty} · ${era.source}`;
-  const eraOverlayFactor = currentEra === 0 ? 0.25 : currentEra === 1 ? 1 : 0.7;
-  ancientOverlay.style.opacity = String(overlayOpacity * eraOverlayFactor);
+  const real = eraOverlayImage[era.id];
+  if (real) {
+    overlayImage.setAttribute('href', real.src);
+    overlayImage.setAttribute('x', String(real.x));
+    overlayImage.setAttribute('y', String(real.y));
+    overlayImage.setAttribute('width', String(real.w));
+    overlayImage.setAttribute('height', String(real.h));
+    overlayCaption.setAttribute('x', String(real.cx));
+    overlayCaption.setAttribute('y', String(real.cy));
+    overlayCaption.textContent = real.caption;
+    ancientOverlay.classList.remove('is-off');
+  } else {
+    ancientOverlay.classList.add('is-off');
+  }
+  ancientOverlay.style.opacity = String(overlayOpacity * eraOverlayFactor(currentEra));
   progress.style.width = `${(currentEra / (eras.length - 1)) * 100}%`;
   timeline.setAttribute('aria-valuenow', String(currentEra));
   document.querySelectorAll<HTMLButtonElement>('.timeline-node').forEach((node, nodeIndex) => node.classList.toggle('is-active', nodeIndex === currentEra));
@@ -180,7 +206,7 @@ if (lastEra > 0) {
 resumeButton.addEventListener('click', () => { renderEra(currentEra); startExperience(); });
 document.querySelector<HTMLButtonElement>('#compare-button')!.addEventListener('click', () => { overlayControl.classList.add('is-open'); overlayControl.setAttribute('aria-hidden', 'false'); });
 document.querySelector<HTMLButtonElement>('#close-overlay')!.addEventListener('click', () => { overlayControl.classList.remove('is-open'); overlayControl.setAttribute('aria-hidden', 'true'); });
-document.querySelector<HTMLInputElement>('#opacity-range')!.addEventListener('input', (event) => { overlayOpacity = Number((event.target as HTMLInputElement).value) / 100; const eraOverlayFactor = currentEra === 0 ? 0.25 : currentEra === 1 ? 1 : 0.7; ancientOverlay.style.opacity = String(overlayOpacity * eraOverlayFactor); document.querySelector<HTMLOutputElement>('#opacity-output')!.textContent = `${Math.round(overlayOpacity * 100)}%`; });
+document.querySelector<HTMLInputElement>('#opacity-range')!.addEventListener('input', (event) => { overlayOpacity = Number((event.target as HTMLInputElement).value) / 100; ancientOverlay.style.opacity = String(overlayOpacity * eraOverlayFactor(currentEra)); document.querySelector<HTMLOutputElement>('#opacity-output')!.textContent = `${Math.round(overlayOpacity * 100)}%`; });
 document.querySelector<HTMLButtonElement>('#open-search')!.addEventListener('click', () => { setDrawer(searchDrawer, true); placeSearch.focus(); renderResults(); });
 document.querySelector<HTMLButtonElement>('#close-search')!.addEventListener('click', () => setDrawer(searchDrawer, false));
 document.querySelector<HTMLButtonElement>('#open-sources')!.addEventListener('click', () => setDrawer(sourcesDrawer, true));

@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 const root = resolve(process.cwd());
@@ -87,6 +87,15 @@ if (mapPlacesBlock) {
   mapPlaceNames.forEach((name) => {
     check(placeNames.has(name), `地图地名「${name}」在 places.json 中可以查到`);
   });
+}
+
+// 真实古图素材必须随版本存在（eraOverlayImage 引用）
+const overlayBlock = mainSource.match(/const eraOverlayImage[^=]*=\s*\{([\s\S]*?)\n\};/);
+check(Boolean(overlayBlock), 'main.ts 保留了 eraOverlayImage 定义');
+if (overlayBlock) {
+  const overlaySrcs = [...overlayBlock[1].matchAll(/src: '([^']+)'/g)].map((match) => match[1]);
+  check(overlaySrcs.length > 0, 'eraOverlayImage 至少声明一幅真实古图');
+  overlaySrcs.forEach((src) => check(existsSync(join(root, 'public', src)), `古图素材存在：${src}`));
 }
 
 if (failures.length) {

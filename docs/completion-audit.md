@@ -64,6 +64,17 @@
 
 仍待外部输入的事项与上表下方主审计一致：真实用户试用、GitHub 仓库地址、正式古图版权核验。
 
+## 增量记录：v0.2.0 真实古图层（2026-10-06）
+
+版权核验完成后（四幅古图在维基共享资源确认 Public domain，见 `docs/source-register.md`），经项目负责人确认采用，真实古图进入产品：
+
+| 增量 | 说明 | 证据 |
+|---|---|---|
+| 真实古图层 | 1136 年叠加《禹迹图》沙畹摹绘本（1903）、1602 年叠加《坤舆万国全图》；透明度滑杆直接控制原图层；商周时代无古图 | `src/main.ts` 的 `eraOverlayImage`、冒烟测试 4 项新用例 |
+| 素材与记录 | 四幅公版素材入 `public/assets/maps/`；NOTICE、来源抽屉、来源登记表同步更新 | `NOTICE.md`、`src/content/sources.json`、`docs/source-register.md` |
+| 素材完整性检查 | `lint-content` 新增 `eraOverlayImage` 引用的素材文件存在性校验 | `scripts/lint-content.mjs` |
+| 诚实标注 | 叠层面板明确“未做严格配准，仅作视觉叠合”，保留示意底图的“示意重绘”水印 | `src/main.ts`、`src/styles/global.css` |
+
 ## 阶段判定：发布准备阶段（2026-10-06 复核）
 
 - **本地验收复核**：在只含提交 `f9e9d33` 的隔离构建树中重跑 `npm run check`，28 项冒烟检查与内容校验全部通过。冻结范围（`docs/scope-freeze.md`）十项要求逐项满足，发布红线未触碰。**结论：v0.1.x 本地阶段达标，进入发布准备阶段。**

@@ -182,3 +182,9 @@ input[type='range'] { width: 100%; accent-color: var(--vermilion); cursor: point
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
 }
+
+/* 真实古图层（已核验公有领域素材，出处见 NOTICE.md）：纸色原图不做正片叠底，保持原图可读。 */
+.ancient-overlay { mix-blend-mode: normal; }
+.ancient-overlay.is-off { display: none; }
+.overlay-image { opacity: .95; }
+.overlay-caption { font-size: 13px; fill: rgba(240, 232, 215, .72); }
