@@ -16,6 +16,19 @@
 
 当前原型中的古图层是示意绘制，不代表任何已授权的高清古地图扫描件。没有完成授权核验前，不应把外部图片替换进公开版本。
 
+## 已采用的真实古地图素材（2026-10-06）
+
+以下四幅图像已在维基共享资源逐幅核验许可标签为 **Public domain**（核验记录见 [docs/source-register.md](docs/source-register.md)），并经项目负责人确认采用。本地图层经等比缩放与轻微裁切，未改动原图内容：
+
+| 素材文件 | 原始文件与来源 |
+|---|---|
+| `public/assets/maps/yujitu-befeo-1903.jpg` | [File:Yuji_tu_-_BEFEO.png](https://commons.wikimedia.org/wiki/File:Yuji_tu_-_BEFEO.png)：沙畹 1903 年摹绘《禹迹图》（原石刻 1136 年，藏西安碑林）；扫描出自美国国会图书馆（g7821c.ct000285） |
+| `public/assets/maps/huayitu-loc-1903.jpg` | [File:Hua_yi_tu._LOC_2002626771.jpg](https://commons.wikimedia.org/wiki/File:Hua_yi_tu._LOC_2002626771.jpg)：约 1903 年《华夷图》拓片（原石刻 1136 年）；藏美国国会图书馆（2002626771） |
+| `public/assets/maps/kunyu-wanguo-1602.jpg` | [File:Kunyu_Wanguo_Quantu_(坤輿萬國全圖).jpg](https://commons.wikimedia.org/wiki/File:Kunyu_Wanguo_Quantu_(%E5%9D%A4%E8%BC%BF%E8%90%AC%E5%9C%8B%E5%85%A8%E5%9C%96).jpg)：17 世纪刊本，日本东北大学附属图书馆狩野文库 |
+| `public/assets/maps/maokun-malacca.jpg` | [File:Mao_Kun_map_-_Malacca.png](https://commons.wikimedia.org/wiki/File:Mao_Kun_map_-_Malacca.png)：《武备志》郑和航海图满剌加段，17 世纪 |
+
+上述素材虽属公有领域、无强制署名义务，本项目仍在来源抽屉中如实标注出处与年代。若共享资源页面许可信息日后变更，以页面当前标注为准并重新核验。
+
 ## 历史表达
 
 - 示意区域和边界不代表现实边界主张；
