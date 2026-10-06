@@ -53,6 +53,7 @@
 | 地图地名点按反查 | 示意地图上的地名变为可交互元素，点按或 Enter 即打开查询抽屉并展示该地考订卡 | `src/main.ts` 的 `mapPlaces` 与 `.map-place` 交互、冒烟测试 3 项新用例 |
 | 内容数据校验 | 新增 `scripts/lint-content.mjs`，校验四份内容 JSON 的必填字段、称谓链、确定性分级和地图地名可查性，已接入 `npm run verify` | `scripts/lint-content.mjs`、`package.json` |
 | 无障碍小修 | 时间轴 `aria-valuemax` 从时代数据派生，不再硬编码；地图地名带 `role="button"` 和键盘触发 | `src/main.ts` |
+| 资源加载修复 | 新增 `favicon.svg`（离线 SVG，无外部依赖），消除每次加载的 `/favicon.ico` 404；`verify` 的资源检查扩展到全部相对路径引用 | `public/favicon.svg`、`index.html`、`scripts/verify-prototype.mjs`、基线截图控制台零错误 |
 | 一键验收脚本 | `npm run check` 串起构建、校验、临时预览与浏览器冒烟测试 | `scripts/check.mjs`、`scripts/smoke.mjs`（Edge 持久化上下文） |
 | 发布包 | 重新构建 `release/yuji-prototype-0.1.1-dist.zip` | `release/` |
 
