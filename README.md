@@ -91,17 +91,9 @@ npm run smoke
 
 构建后的静态发布包位于 [release/yuji-prototype-0.1.1-dist.zip](release/yuji-prototype-0.1.1-dist.zip)，解压后可直接上传到静态托管服务。
 
-## 连接 GitHub 并发布
+## 连接 GitHub 并发布（已完成）
 
-当前目录已经是本地 Git 仓库，默认分支是 `main`，版本标签是 `v0.1.0`。项目负责人获得 GitHub 仓库地址后，在项目目录执行：
-
-```bash
-git remote add origin <你的 GitHub 仓库地址>
-git push -u origin main
-git push origin v0.1.0
-```
-
-然后在 GitHub 仓库的 **Settings → Pages** 中，将发布来源设置为 **GitHub Actions**。之后每次推送到 `main`，工作流都会自动构建和发布。
+项目已发布：仓库地址 [github.com/WYHCIPUC/yuji](https://github.com/WYHCIPUC/yuji)，线上地址 [wyhcipuc.github.io/yuji](https://wyhcipuc.github.io/yuji/)。`main` 分支和 `v0.1.0` 标签均已推送，GitHub Pages 构建源已设为 GitHub Actions，之后每次推送到 `main` 都会自动构建和发布。
 
 用户测试可以直接照着 [docs/user-test-script.md](docs/user-test-script.md) 执行；公开发布前使用 [docs/release-checklist.md](docs/release-checklist.md) 逐项确认。
 
