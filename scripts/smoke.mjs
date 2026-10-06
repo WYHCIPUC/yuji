@@ -1,9 +1,12 @@
 import { chromium } from 'playwright-core';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 const edgePath = process.env.YUJI_BROWSER ?? 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
 const url = process.env.YUJI_PREVIEW_URL ?? 'http://127.0.0.1:4173/';
-const browser = await chromium.launch({ executablePath: edgePath, headless: true, args: ['--no-sandbox'] });
-const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+const profileDir = mkdtempSync(join(tmpdir(), 'yuji-smoke-'));
+const context = await chromium.launchPersistentContext(profileDir, { executablePath: edgePath, headless: true, args: ['--no-sandbox'], viewport: { width: 1280, height: 900 } });
 const page = await context.newPage();
 const failures = [];
 
@@ -60,8 +63,8 @@ try {
   check(await page.locator('#search-drawer').evaluate((node) => node.classList.contains('is-open')), 'Ctrl+K 可以打开地名查询');
   await page.keyboard.press('Escape');
 
-  const mobileContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
-  const mobilePage = await mobileContext.newPage();
+  const mobilePage = await context.newPage();
+  await mobilePage.setViewportSize({ width: 390, height: 844 });
   await mobilePage.emulateMedia({ reducedMotion: 'reduce' });
   await mobilePage.goto(`${url}?stage=experience`, { waitUntil: 'networkidle' });
   check(await mobilePage.locator('#experience').evaluate((node) => node.classList.contains('is-visible')), '移动端核心页面可见');
@@ -71,10 +74,10 @@ try {
   await mobilePage.locator('#open-search').click();
   await mobilePage.locator('#place-search').fill('临安');
   check((await mobilePage.locator('.place-result').first().textContent()).includes('杭州'), '移动端地名查询可用');
-  await mobileContext.close();
+  await mobilePage.close();
 
-  const resumeContext = await browser.newContext({ viewport: { width: 1280, height: 900 } });
-  const resumePage = await resumeContext.newPage();
+  const resumePage = await context.newPage();
+  await resumePage.setViewportSize({ width: 1280, height: 900 });
   await resumePage.goto(`${url}?stage=experience`, { waitUntil: 'networkidle' });
   await resumePage.evaluate(() => localStorage.setItem('yuji-era', '1'));
   await resumePage.goto(url, { waitUntil: 'networkidle' });
@@ -82,9 +85,10 @@ try {
   check((await resumePage.locator('#resume-button').textContent()).includes('1136'), '继续入口显示上次时代');
   await resumePage.locator('#resume-button').click();
   check(await resumePage.locator('.app-shell').getAttribute('data-era') === 'yujitu', '继续入口恢复上次时代');
-  await resumeContext.close();
+  await resumePage.close();
 } finally {
-  await browser.close();
+  await context.close();
+  rmSync(profileDir, { recursive: true, force: true });
 }
 
 if (failures.length) {

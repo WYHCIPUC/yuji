@@ -56,7 +56,7 @@ npm run verify
 
 ## 浏览器冒烟测试
 
-确保先启动 `npm run preview`，然后执行：
+如果预览服务器已经启动，可以单独执行：
 
 ```bash
 npm run smoke
@@ -64,7 +64,7 @@ npm run smoke
 
 它会在本机 Edge 中自动完成一次核心流程，不会上传数据或访问外部服务。
 
-如果只想执行完整验收，可以直接运行：
+如果希望一条命令完成构建、启动临时预览和浏览器测试，可以直接运行：
 
 ```bash
 npm run check

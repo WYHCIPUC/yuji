@@ -10,7 +10,7 @@
     "serve:local": "vite preview --host 127.0.0.1 --port 4173",
     "verify": "node scripts/verify-prototype.mjs",
     "smoke": "node scripts/smoke.mjs",
-    "check": "npm run build && npm run verify && npm run smoke"
+    "check": "node scripts/check.mjs"
   },
   "devDependencies": {
     "playwright-core": "^1.63.0",
