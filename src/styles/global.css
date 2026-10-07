@@ -296,3 +296,14 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
 .ancient-overlay.is-off { display: none; }
 .overlay-image { opacity: .95; }
 .overlay-caption { font-size: 13px; fill: rgba(240, 232, 215, .72); }
+
+/* 真实地理底图（Natural Earth 公有领域数据，等距圆柱投影，见 scripts/build-basemap.mjs） */
+.geo-layer { transition: opacity 1s var(--ease); }
+.geo-coast path { fill: none; stroke: rgba(240, 232, 215, .52); stroke-width: 1.1; }
+.geo-lakes path { fill: rgba(126, 170, 163, .16); stroke: rgba(126, 170, 163, .38); stroke-width: .6; }
+.geo-rivers path { fill: none; stroke: rgba(126, 170, 163, .5); stroke-width: .8; }
+.geo-rivers path[data-river="Huang"], .geo-rivers path[data-river="Yangtze"] { stroke: rgba(126, 170, 163, .9); stroke-width: 1.7; }
+.app-shell[data-era="shangzhou"] .geo-layer { opacity: .1; }
+.app-shell[data-era="yujitu"] .geo-layer { opacity: .55; }
+.app-shell[data-era="kunyu"] .geo-layer { opacity: .85; }
+#opacity-range:disabled { opacity: .35; cursor: not-allowed; }

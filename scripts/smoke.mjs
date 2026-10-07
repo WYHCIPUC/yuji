@@ -26,6 +26,13 @@ try {
   await page.locator('.timeline-node[data-index="1"]').click();
   check(await page.locator('.app-shell').getAttribute('data-era') === 'yujitu', '点击 1136 年后时代状态正确');
   check((await page.locator('#era-title').textContent()).includes('格子'), '时代标题已更新');
+  check(await page.locator('.geo-coast path').count() > 10, '真实地理底图海岸线已渲染');
+  check(await page.locator('.geo-rivers path').count() > 10, '真实地理底图河流已渲染');
+  const dotCx = async (name) => Number(await page.locator(`.map-place[data-place="${name}"] .place-dot`).getAttribute('cx'));
+  const dotCy = async (name) => Number(await page.locator(`.map-place[data-place="${name}"] .place-dot`).getAttribute('cy'));
+  check((await dotCx('燕京')) > (await dotCx('长安')), '地名方位正确：燕京在长安以东');
+  check((await dotCx('敦煌')) < (await dotCx('洛阳')), '地名方位正确：敦煌在洛阳以西');
+  check((await dotCy('临安')) > (await dotCy('燕京')), '地名方位正确：临安在燕京以南');
   check((await page.locator('#overlay-image').getAttribute('href')).includes('yujitu'), '1136 年叠层加载《禹迹图》原图');
   check(await page.evaluate(() => fetch('assets/maps/yujitu-befeo-1903.jpg', { method: 'HEAD' }).then((response) => response.status)) === 200, '《禹迹图》素材文件可访问');
 
@@ -62,6 +69,9 @@ try {
 
   await page.locator('#reset-timeline').click();
   check(await page.locator('.app-shell').getAttribute('data-era') === 'shangzhou', '重置按钮可以回到时间轴起点');
+  await page.locator('#compare-button').click();
+  check((await page.locator('#overlay-desc').textContent()).includes('还没有传世地图'), '商周对照面板如实说明无传世地图');
+  await page.keyboard.press('Escape');
 
   await page.locator('#timeline').focus();
   await page.keyboard.press('ArrowRight');
