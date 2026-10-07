@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>禹迹 · 正在跳转</title>
+    <meta http-equiv="refresh" content="0; url=/yuji/" />
+    <style>body { background: #171614; color: #f0e8d7; font-family: 'Noto Serif SC', serif; display: grid; place-items: center; min-height: 100vh; margin: 0; } a { color: #c5a45b; }</style>
+  </head>
+  <body>
+    <p>正在回到《禹迹》… 如果没有自动跳转，请点这里：<a href="/yuji/">进入禹迹</a></p>
+    <script>
+      // 覆盖子路径 404（如 /yuji/xxx）；根路径 404 由 GitHub 提供，此页不被使用。
+      if (!location.pathname.replace(/\/+$/, '').endsWith('/yuji')) location.replace('/yuji/');
+    </script>
+  </body>
+</html>
