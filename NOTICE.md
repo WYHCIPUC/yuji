@@ -22,7 +22,7 @@
 
 | 素材文件 | 原始文件与来源 |
 |---|---|
-| `public/assets/maps/yujitu-befeo-1903.jpg` | [File:Yuji_tu_-_BEFEO.png](https://commons.wikimedia.org/wiki/File:Yuji_tu_-_BEFEO.png)：沙畹 1903 年摹绘《禹迹图》（原石刻 1136 年，藏西安碑林）；扫描出自美国国会图书馆（g7821c.ct000285） |
+| `public/assets/maps/yujitu-1136-loc.jpg` | [File:Yuji_tu_-_enhanced_contrast.png](https://commons.wikimedia.org/wiki/File:Yuji_tu_-_enhanced_contrast.png)：《禹迹图》拓片（原石刻 1136 年，藏西安碑林），美国国会图书馆藏（g7821c.ct001493），高对比增强版，Public domain |
 | `public/assets/maps/huayitu-loc-1903.jpg` | [File:Hua_yi_tu._LOC_2002626771.jpg](https://commons.wikimedia.org/wiki/File:Hua_yi_tu._LOC_2002626771.jpg)：约 1903 年《华夷图》拓片（原石刻 1136 年）；藏美国国会图书馆（2002626771） |
 | `public/assets/maps/kunyu-wanguo-1602.jpg` | [File:Kunyu_Wanguo_Quantu_(坤輿萬國全圖).jpg](https://commons.wikimedia.org/wiki/File:Kunyu_Wanguo_Quantu_(%E5%9D%A4%E8%BC%BF%E8%90%AC%E5%9C%8B%E5%85%A8%E5%9C%96).jpg)：17 世纪刊本，日本东北大学附属图书馆狩野文库 |
 | `public/assets/maps/maokun-malacca.jpg` | [File:Mao_Kun_map_-_Malacca.png](https://commons.wikimedia.org/wiki/File:Mao_Kun_map_-_Malacca.png)：《武备志》郑和航海图满剌加段，17 世纪 |

@@ -56,9 +56,6 @@ button:focus-visible, input:focus-visible, [tabindex]:focus-visible { outline: 2
   radial-gradient(120% 90% at 50% 45%, transparent 58%, rgba(10, 10, 8, .38)),
   repeating-linear-gradient(0deg, rgba(240, 232, 215, .013) 0 1px, transparent 1px 4px); }
 .map-svg { position: relative; display: block; width: 100%; height: auto; min-height: 430px; }
-@media (min-width: 761px) {
-  .map-svg { max-height: 52vh; margin: 0 auto; }
-}
 .map-paper { fill: url(#paper-vignette); opacity: .85; }
 .map-frame { fill: none; stroke: rgba(240,232,215,.24); stroke-width: 1; }
 .map-svg text { fill: rgba(240, 232, 215, .8); font-size: 14px; font-family: var(--font-serif); }
@@ -299,6 +296,7 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
 
 /* 真实地理底图（Natural Earth 公有领域数据，等距圆柱投影，见 scripts/build-basemap.mjs） */
 .geo-layer { transition: opacity 1s var(--ease); }
+.geo-land path { fill: rgba(216, 194, 154, .09); stroke: none; }
 .geo-coast path { fill: none; stroke: rgba(240, 232, 215, .52); stroke-width: 1.1; }
 .geo-lakes path { fill: rgba(126, 170, 163, .16); stroke: rgba(126, 170, 163, .38); stroke-width: .6; }
 .geo-rivers path { fill: none; stroke: rgba(126, 170, 163, .5); stroke-width: .8; }

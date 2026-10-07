@@ -34,7 +34,7 @@ try {
   check((await dotCx('敦煌')) < (await dotCx('洛阳')), '地名方位正确：敦煌在洛阳以西');
   check((await dotCy('临安')) > (await dotCy('燕京')), '地名方位正确：临安在燕京以南');
   check((await page.locator('#overlay-image').getAttribute('href')).includes('yujitu'), '1136 年叠层加载《禹迹图》原图');
-  check(await page.evaluate(() => fetch('assets/maps/yujitu-befeo-1903.jpg', { method: 'HEAD' }).then((response) => response.status)) === 200, '《禹迹图》素材文件可访问');
+  check(await page.evaluate(() => fetch('assets/maps/yujitu-1136-loc.jpg', { method: 'HEAD' }).then((response) => response.status)) === 200, '《禹迹图》素材文件可访问');
 
   const timeline = page.locator('#timeline');
   const bounds = await timeline.boundingBox();

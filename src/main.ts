@@ -28,8 +28,8 @@ const mapPlaces = [
   { name: '广州', lng: 113.26, lat: 23.13 },
 ].map((place) => { const p = project(place.lng, place.lat); return { ...place, x: Math.round(p.x), y: Math.round(p.y), hit: 26 }; });
 
-// 真实地理底图（Natural Earth 公有领域数据）：海岸线、河流、湖泊，几何真实、非示意绘制。
-const geoLayer = `<g class="geo-layer"><g class="geo-coast">${basemap.coast.map((d: string) => `<path d="${d}"/>`).join('')}</g><g class="geo-lakes">${basemap.lakes.map((lake: { d: string }) => `<path d="${lake.d}"/>`).join('')}</g><g class="geo-rivers">${basemap.rivers.map((river: { name: string; d: string }) => `<path d="${river.d}" data-river="${river.name}"/>`).join('')}</g></g>`;
+// 真实地理底图（Natural Earth 公有领域数据）：陆地、海岸线、河流、湖泊，几何真实、非示意绘制。
+const geoLayer = `<g class="geo-layer"><g class="geo-land">${basemap.land.map((d: string) => `<path d="${d}"/>`).join('')}</g><g class="geo-coast">${basemap.coast.map((d: string) => `<path d="${d}"/>`).join('')}</g><g class="geo-lakes">${basemap.lakes.map((lake: { d: string }) => `<path d="${lake.d}"/>`).join('')}</g><g class="geo-rivers">${basemap.rivers.map((river: { name: string; d: string }) => `<path d="${river.d}" data-river="${river.name}"/>`).join('')}</g></g>`;
 
 // 天下模型与时代的默认对应；用户仍可手动切换。
 const modelByEra: Record<string, string> = { shangzhou: '服制', yujitu: '郡县', kunyu: '地圆' };
@@ -44,7 +44,7 @@ const eraChar: Record<string, string> = { shangzhou: '商', yujitu: '宋', kunyu
 
 // 真实古图层：已核验公有领域素材（许可与出处见 NOTICE.md 和来源抽屉），素材文件由 scripts/lint-content.mjs 校验存在。
 const eraOverlayImage: Record<string, { src: string; caption: string; x: number; y: number; w: number; h: number; cx: number; cy: number }> = {
-  yujitu: { src: 'assets/maps/yujitu-befeo-1903.jpg', caption: '《禹迹图》沙畹摹绘本 · 1903 · 公有领域', x: 287, y: 52, w: 426, h: 480, cx: 287, cy: 536 },
+  yujitu: { src: 'assets/maps/yujitu-1136-loc.jpg', caption: '《禹迹图》1136 年石刻 · 美国国会图书馆藏拓 · 公有领域', x: 287, y: 52, w: 426, h: 480, cx: 287, cy: 536 },
   kunyu: { src: 'assets/maps/kunyu-wanguo-1602.jpg', caption: '《坤舆万国全图》 · 1602 · 公有领域', x: 130, y: 125, w: 740, h: 332, cx: 130, cy: 480 },
 };
 
@@ -53,7 +53,7 @@ if (!app) throw new Error('App root not found');
 
 const lastEra = Number(localStorage.getItem('yuji-era') ?? 0);
 let currentEra = Number.isFinite(lastEra) && lastEra >= 0 && lastEra < eras.length ? lastEra : 0;
-let overlayOpacity = 0.55;
+let overlayOpacity = 1;
 let hasStarted = false;
 let searchTerm = '';
 function storytellerOf(eraId: string): Storyteller {
@@ -175,14 +175,14 @@ app.innerHTML = `
                 <text y="42" class="compass-n">午</text>
               </g>
               <g class="map-places">${mapPlaces.map((place) => `<g class="map-place" data-place="${place.name}" role="button" tabindex="0" aria-label="查询地名：${place.name}"><circle class="place-hit" cx="${place.x}" cy="${place.y}" r="${place.hit}"/><circle class="place-dot" cx="${place.x}" cy="${place.y}" r="8"/><text class="place-label" x="${place.x - 16}" y="${place.y - 16}">${place.name}</text></g>`).join('')}</g>
-              <g class="ancient-overlay" id="ancient-overlay"><g class="overlay-real"><image id="overlay-image" class="overlay-image" x="287" y="52" width="426" height="480" preserveAspectRatio="xMidYMid meet" href="assets/maps/yujitu-befeo-1903.jpg"/><text id="overlay-caption" x="287" y="536" class="overlay-caption">《禹迹图》沙畹摹绘本 · 1903 · 公有领域</text></g></g>
+              <g class="ancient-overlay" id="ancient-overlay"><g class="overlay-real"><image id="overlay-image" class="overlay-image" x="287" y="52" width="426" height="480" preserveAspectRatio="xMidYMid meet" href="assets/maps/yujitu-1136-loc.jpg"/><text id="overlay-caption" x="287" y="536" class="overlay-caption">《禹迹图》1136 年石刻 · 美国国会图书馆藏拓 · 公有领域</text></g></g>
             </g>
             <rect x="86" y="42" width="828" height="500" rx="8" class="map-frame"/>
           </svg>
           <div class="map-stamp">示意重绘<br />不代表现实边界</div>
           <button class="expand-button" id="expand-map" aria-label="放大查看地图" title="放大查看地图">⤢</button>
           <button class="compare-button" id="compare-button"><span class="compare-icon">◐</span><span>掀开古今对照</span></button>
-          <div class="overlay-control" id="overlay-control" aria-hidden="true"><div class="overlay-panel"><div class="panel-heading"><div><p class="card-label">古今叠层</p><h3>掀开古图，对照今图</h3></div><button class="close-button" id="close-overlay" aria-label="关闭古今叠层">×</button></div><p id="overlay-desc">古图为已核验的公版原图（禹迹图 / 坤舆万国全图），与今图未做严格配准，仅作视觉叠合；方位与比例的真实差异本身就是历史。</p><label for="opacity-range">古图叠层 <output id="opacity-output">55%</output></label><input id="opacity-range" type="range" min="0" max="100" value="55"/><div class="panel-foot"><span>今图 · 现代示意</span><span>古图 · 禹迹图式</span></div></div></div>
+          <div class="overlay-control" id="overlay-control" aria-hidden="true"><div class="overlay-panel"><div class="panel-heading"><div><p class="card-label">古今叠层</p><h3>掀开古图，对照今图</h3></div><button class="close-button" id="close-overlay" aria-label="关闭古今叠层">×</button></div><p id="overlay-desc">古图为已核验的公版原图（禹迹图 / 坤舆万国全图），与今图未做严格配准，仅作视觉叠合；方位与比例的真实差异本身就是历史。</p><label for="opacity-range">向下拖动掀开古图，露出今图 · 古图浓度 <output id="opacity-output">100%</output></label><input id="opacity-range" type="range" min="0" max="100" value="100"/><div class="panel-foot"><span>今图 · Natural Earth 实测地理</span><span>古图 · 传世原图</span></div></div></div>
         </div>
 
         <div class="timeline-wrap">
@@ -237,8 +237,8 @@ const overlayImage = document.querySelector<SVGImageElement>('#overlay-image')!;
 const overlayCaption = document.querySelector<SVGTextElement>('#overlay-caption')!;
 
 function eraOverlayFactor(index: number): number {
-  // 真实古图默认半掩，保证底图可读；掀开对照时才加浓。商周是想象时代，没有古图。
-  return index === 0 ? 0 : index === 1 ? 0.55 : 0.4;
+  // 古图为主角：有图时代默认近全显；掀开对照（滑杆向下）才露出今图。商周无传世地图。
+  return index === 0 ? 0 : index === 1 ? 1 : 0.95;
 }
 const overlayControl = document.querySelector<HTMLElement>('#overlay-control')!;
 const searchDrawer = document.querySelector<HTMLElement>('#search-drawer')!;
@@ -362,12 +362,12 @@ document.querySelector<HTMLButtonElement>('#compare-button')!.addEventListener('
     : '这个时代还没有传世地图。天下以《禹贡》五服的观念图呈现——在地图诞生之前，世界是一种秩序想象，而不是被测量的地面。';
   const range = document.querySelector<HTMLInputElement>('#opacity-range')!;
   range.disabled = !hasRealMap;
-  // 对照模式下叠层不低于 0.85：保证拖动滑杆时有可感知的图层变化。
-  if (hasRealMap && overlayOpacity < 0.55) {
-    overlayOpacity = 0.55;
-    range.value = '55';
-    ancientOverlay.style.opacity = String(overlayOpacity * Math.max(eraOverlayFactor(currentEra), 0.85));
-    document.querySelector<HTMLOutputElement>('#opacity-output')!.textContent = '55%';
+  // 对照模式下古图浓度不低于 90%：一掀开就是主角，向下拖才见今图。
+  if (hasRealMap && overlayOpacity < 0.9) {
+    overlayOpacity = 0.9;
+    range.value = '90';
+    ancientOverlay.style.opacity = String(overlayOpacity * Math.max(eraOverlayFactor(currentEra), 0.9));
+    document.querySelector<HTMLOutputElement>('#opacity-output')!.textContent = '90%';
   }
 });
 document.querySelector<HTMLButtonElement>('#close-overlay')!.addEventListener('click', () => { overlayControl.classList.remove('is-open'); overlayControl.setAttribute('aria-hidden', 'true'); renderEra(currentEra); });
@@ -375,7 +375,7 @@ overlayControl.addEventListener('click', (event) => { if (event.target === overl
 document.querySelector<HTMLInputElement>('#opacity-range')!.addEventListener('input', (event) => {
   overlayOpacity = Number((event.target as HTMLInputElement).value) / 100;
   const compareMode = overlayControl.classList.contains('is-open');
-  const factor = compareMode ? Math.max(eraOverlayFactor(currentEra), 0.85) : eraOverlayFactor(currentEra);
+  const factor = compareMode ? Math.max(eraOverlayFactor(currentEra), 0.9) : eraOverlayFactor(currentEra);
   ancientOverlay.style.opacity = String(overlayOpacity * factor);
   document.querySelector<HTMLOutputElement>('#opacity-output')!.textContent = `${Math.round(overlayOpacity * 100)}%`;
 });

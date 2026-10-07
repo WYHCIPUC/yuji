@@ -11,6 +11,7 @@ const files = {
   coast: 'ne_50m_coastline.json',
   rivers: 'ne_50m_rivers_lake_centerlines.json',
   lakes: 'ne_50m_lakes.json',
+  land: 'ne_50m_land.json',
 };
 
 for (const file of Object.values(files)) {
@@ -103,6 +104,12 @@ for (const f of readGeo('rivers').features) {
   for (const d of geometryToPaths(f.geometry)) rivers.push({ name, d });
 }
 
+const land = [];
+for (const f of readGeo('land').features) {
+  if (!featureIntersects(f.geometry, 0.5)) continue;
+  for (const d of geometryToPaths(f.geometry)) land.push(d);
+}
+
 const lakes = [];
 for (const f of readGeo('lakes').features) {
   if (!featureIntersects(f.geometry, 1)) continue;
@@ -112,6 +119,7 @@ for (const f of readGeo('lakes').features) {
 const basemap = {
   source: 'Natural Earth 50m（公有领域，naturalearthdata.com）',
   projection: { lon0: BBOX.lon0, lat1: BBOX.lat1, scale: Number(SCALE.toFixed(4)), cosMid: Number(COS_MID.toFixed(4)), offX: Number(OFF_X.toFixed(1)), offY: Number(OFF_Y.toFixed(1)) },
+  land,
   coast,
   rivers,
   lakes,

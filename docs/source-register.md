@@ -31,7 +31,7 @@
 
 | 内容名称 | 共享资源文件 | 许可 | 来源链与馆藏 | 备注 |
 |---|---|---|---|---|
-| 《禹迹图》1136 | [File:Yuji_tu_-_BEFEO.png](https://commons.wikimedia.org/wiki/File:Yuji_tu_-_BEFEO.png) | Public domain | 沙畹（Édouard Chavannes）1903 年摹绘本，载 BEFEO 第 3 卷 214–247 页；扫描出自美国国会图书馆地理与地图部，数字 ID [g7821c.ct000285](https://hdl.loc.gov/loc.gmd/g7821c.ct000285) | 摹绘本非拓片，线条更清晰，适合原型叠层；拓片候选另见 Commons「China1136.png」等 |
+| 《禹迹图》1136（主图源，高对比版） | [File:Yuji_tu_-_enhanced_contrast.png](https://commons.wikimedia.org/wiki/File:Yuji_tu_-_enhanced_contrast.png)（LOC g7821c.ct001493；备用：BEFEO 1903 摹绘本 ct000285） | Public domain | 沙畹（Édouard Chavannes）1903 年摹绘本，载 BEFEO 第 3 卷 214–247 页；扫描出自美国国会图书馆地理与地图部，数字 ID [g7821c.ct000285](https://hdl.loc.gov/loc.gmd/g7821c.ct000285) | 摹绘本非拓片，线条更清晰，适合原型叠层；拓片候选另见 Commons「China1136.png」等 |
 | 《华夷图》1136 | [File:Hua_yi_tu._LOC_2002626771.jpg](https://commons.wikimedia.org/wiki/File:Hua_yi_tu._LOC_2002626771.jpg)（另有 .tif 高清版） | Public domain | 1903 年前后拓片，载 BEFEO 1903 第 214 页对面；藏美国国会图书馆，数字 ID **2002626771** | 与禹迹图同石正反两面；拓片照片候选另见「Rubbing_of_Huayi_tu_map.jpg」 |
 | 《坤舆万国全图》1602 | [File:Kunyu_Wanguo_Quantu_(坤輿萬國全圖).jpg](https://commons.wikimedia.org/wiki/File:Kunyu_Wanguo_Quantu_(%E5%9D%A4%E8%BC%BF%E8%90%AC%E5%9C%8B%E5%85%A8%E5%9C%96).jpg) | Public domain | 日本东北大学附属图书馆狩野文库图像数据库（17 世纪刊本） | 分面板版本另见「Kunyu_Wanguo_Quantu_by_Matteo_Ricci_*」系列 |
 | 《郑和航海图》（《武备志》卷 240） | [File:Mao_Kun_map_-_Singapore.png](https://commons.wikimedia.org/wiki/File:Mao_Kun_map_-_Singapore.png) 等分段系列 | Public domain | 茅元仪《武备志》（17 世纪）；分段扫描经 Wheatley (1961)《金洲研究》转载 | Commons 收录多段（满剌加、苏门答腊、锡兰与非洲等），采用时需逐段核对 |
