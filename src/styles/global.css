@@ -290,3 +290,9 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
 .lightbox-body .map-svg { width: 100%; height: auto; min-height: 0; cursor: grab; }
 .lightbox-close { position: fixed; top: 22px; right: 26px; background: rgba(23, 22, 20, .7); }
 .lightbox-hint { position: fixed; left: 0; right: 0; bottom: 20px; margin: 0; color: var(--muted-dark); font-size: 11px; letter-spacing: .1em; text-align: center; pointer-events: none; }
+
+/* 真实古图层（已核验公有领域素材，出处见 NOTICE.md）：纸色原图不做正片叠底，保持原图可读。 */
+.ancient-overlay { mix-blend-mode: normal; }
+.ancient-overlay.is-off { display: none; }
+.overlay-image { opacity: .95; }
+.overlay-caption { font-size: 13px; fill: rgba(240, 232, 215, .72); }

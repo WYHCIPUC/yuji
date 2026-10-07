@@ -32,6 +32,12 @@ const modelCopy: Record<string, string> = {
 // 时代单字水印：填充地图卡左侧留白，与右侧竖排引文对称。
 const eraChar: Record<string, string> = { shangzhou: '商', yujitu: '宋', kunyu: '明' };
 
+// 真实古图层：已核验公有领域素材（许可与出处见 NOTICE.md 和来源抽屉），素材文件由 scripts/lint-content.mjs 校验存在。
+const eraOverlayImage: Record<string, { src: string; caption: string; x: number; y: number; w: number; h: number; cx: number; cy: number }> = {
+  yujitu: { src: 'assets/maps/yujitu-befeo-1903.jpg', caption: '《禹迹图》沙畹摹绘本 · 1903 · 公有领域', x: 130, y: 62, w: 391, h: 440, cx: 130, cy: 524 },
+  kunyu: { src: 'assets/maps/kunyu-wanguo-1602.jpg', caption: '《坤舆万国全图》 · 1602 · 公有领域', x: 150, y: 118, w: 730, h: 328, cx: 150, cy: 472 },
+};
+
 const app = document.querySelector<HTMLDivElement>('#app');
 if (!app) throw new Error('App root not found');
 
@@ -55,7 +61,7 @@ app.innerHTML = `
     <div class="grain" aria-hidden="true"></div>
     <header class="topbar">
       <a class="brand" href="#" aria-label="禹迹首页"><span class="brand-mark">禹</span><span>禹迹</span></a>
-      <div class="topbar-meta"><span class="eyebrow">历史地理交互叙事 · 原型 0.1</span><button class="text-button" id="open-sources">来源与说明</button></div>
+      <div class="topbar-meta"><span class="eyebrow">历史地理交互叙事 · 原型 0.2.1</span><button class="text-button" id="open-sources">来源与说明</button></div>
     </header>
 
     <main>
@@ -165,14 +171,14 @@ app.innerHTML = `
                 <text y="42" class="compass-n">午</text>
               </g>
               <g class="map-places">${mapPlaces.map((place) => `<g class="map-place" data-place="${place.name}" role="button" tabindex="0" aria-label="查询地名：${place.name}"><circle class="place-hit" cx="${place.x}" cy="${place.y}" r="${place.hit}"/><circle class="place-dot" cx="${place.x}" cy="${place.y}" r="8"/><text class="place-label" x="${place.x - 16}" y="${place.y - 16}">${place.name}</text></g>`).join('')}</g>
-              <g class="ancient-overlay" id="ancient-overlay"><rect x="86" y="42" width="828" height="500" fill="url(#paper-gradient)"/><path d="M142 140 Q310 62 480 142 T860 128 M110 360 Q270 280 450 370 T900 340" class="overlay-brush"/><path d="M170 100V480 M280 74V500 M390 72V500 M500 72V500 M610 72V500 M720 72V500 M830 72V500" class="overlay-grid"/><text x="150" y="112" class="overlay-title">禹迹圖</text><text x="150" y="134" class="overlay-subtitle">配准示意 · 非原本</text></g>
+              <g class="ancient-overlay" id="ancient-overlay"><g class="overlay-real"><image id="overlay-image" class="overlay-image" x="130" y="62" width="391" height="440" preserveAspectRatio="xMidYMid meet" href="assets/maps/yujitu-befeo-1903.jpg"/><text id="overlay-caption" x="130" y="524" class="overlay-caption">《禹迹图》沙畹摹绘本 · 1903 · 公有领域</text></g></g>
             </g>
             <rect x="86" y="42" width="828" height="500" rx="8" class="map-frame"/>
           </svg>
           <div class="map-stamp">示意重绘<br />不代表现实边界</div>
           <button class="expand-button" id="expand-map" aria-label="放大查看地图" title="放大查看地图">⤢</button>
           <button class="compare-button" id="compare-button"><span class="compare-icon">◐</span><span>掀开古今对照</span></button>
-          <div class="overlay-control" id="overlay-control" aria-hidden="true"><div class="overlay-panel"><div class="panel-heading"><div><p class="card-label">古今叠层</p><h3>掀开古图，对照今图</h3></div><button class="close-button" id="close-overlay" aria-label="关闭古今叠层">×</button></div><p>古图叠层为预配准示意。差异会受到比例、投影和控制点选择影响。</p><label for="opacity-range">古图叠层 <output id="opacity-output">55%</output></label><input id="opacity-range" type="range" min="0" max="100" value="55"/><div class="panel-foot"><span>今图 · 现代示意</span><span>古图 · 禹迹图式</span></div></div></div>
+          <div class="overlay-control" id="overlay-control" aria-hidden="true"><div class="overlay-panel"><div class="panel-heading"><div><p class="card-label">古今叠层</p><h3>掀开古图，对照今图</h3></div><button class="close-button" id="close-overlay" aria-label="关闭古今叠层">×</button></div><p>古图为已核验的公版原图（禹迹图 / 坤舆万国全图），与今图未做严格配准，仅作视觉叠合；方位与比例的真实差异本身就是历史。</p><label for="opacity-range">古图叠层 <output id="opacity-output">55%</output></label><input id="opacity-range" type="range" min="0" max="100" value="55"/><div class="panel-foot"><span>今图 · 现代示意</span><span>古图 · 禹迹图式</span></div></div></div>
         </div>
 
         <div class="timeline-wrap">
@@ -195,8 +201,8 @@ app.innerHTML = `
     </main>
 
     <footer class="site-footer">
-      <span>禹迹 · 历史地理交互叙事原型 0.1</span>
-      <span class="footer-note">内容为产品化整理，发布前待核验</span>
+      <span>禹迹 · 历史地理交互叙事原型 0.2.1</span>
+      <span class="footer-note">内容为产品化整理，古图素材已核验公有领域</span>
     </footer>
 
     <div class="map-lightbox" id="map-lightbox" aria-hidden="true"><button class="close-button lightbox-close" id="close-lightbox" aria-label="关闭放大地图">×</button><p class="lightbox-hint">点按空白处关闭 · 示意重绘，不代表现实边界</p><div class="lightbox-body" id="lightbox-body"></div></div>
@@ -223,17 +229,19 @@ const progress = document.querySelector<HTMLElement>('#timeline-progress')!;
 const cursor = document.querySelector<HTMLElement>('#timeline-cursor')!;
 const timeline = document.querySelector<HTMLElement>('#timeline')!;
 const ancientOverlay = document.querySelector<HTMLElement>('#ancient-overlay')!;
+const overlayImage = document.querySelector<SVGImageElement>('#overlay-image')!;
+const overlayCaption = document.querySelector<SVGTextElement>('#overlay-caption')!;
+
+function eraOverlayFactor(index: number): number {
+  // 真实古图默认半掩，保证底图可读；掀开对照时才加浓。商周是想象时代，没有古图。
+  return index === 0 ? 0 : index === 1 ? 0.55 : 0.4;
+}
 const overlayControl = document.querySelector<HTMLElement>('#overlay-control')!;
 const searchDrawer = document.querySelector<HTMLElement>('#search-drawer')!;
 const sourcesDrawer = document.querySelector<HTMLElement>('#sources-drawer')!;
 const placeSearch = document.querySelector<HTMLInputElement>('#place-search')!;
 const searchResults = document.querySelector<HTMLElement>('#search-results')!;
 const searchSuggestions = document.querySelector<HTMLElement>('#search-suggestions')!;
-
-function eraOverlayFactor(index: number): number {
-  // 叠层默认清淡，保证底图清晰；掀开对照时才加浓。
-  return index === 0 ? 0 : index === 1 ? 0.3 : 0.15;
-}
 
 function renderEra(index: number) {
   currentEra = Math.max(0, Math.min(eras.length - 1, index));
@@ -261,6 +269,20 @@ function renderEra(index: number) {
     const dotRect = dot.getBoundingClientRect();
     const trackRect = timeline.getBoundingClientRect();
     if (trackRect.width > 0) aligned = ((dotRect.left + dotRect.width / 2 - trackRect.left) / trackRect.width) * 100;
+  }
+  const real = eraOverlayImage[era.id];
+  if (real) {
+    overlayImage.setAttribute('href', real.src);
+    overlayImage.setAttribute('x', String(real.x));
+    overlayImage.setAttribute('y', String(real.y));
+    overlayImage.setAttribute('width', String(real.w));
+    overlayImage.setAttribute('height', String(real.h));
+    overlayCaption.setAttribute('x', String(real.cx));
+    overlayCaption.setAttribute('y', String(real.cy));
+    overlayCaption.textContent = real.caption;
+    ancientOverlay.classList.remove('is-off');
+  } else {
+    ancientOverlay.classList.add('is-off');
   }
   ancientOverlay.style.opacity = String(overlayOpacity * eraOverlayFactor(currentEra));
   progress.style.width = `${aligned}%`;
