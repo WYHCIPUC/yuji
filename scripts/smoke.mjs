@@ -77,7 +77,13 @@ try {
   await mobilePage.emulateMedia({ reducedMotion: 'reduce' });
   await mobilePage.goto(`${url}?stage=experience`, { waitUntil: 'networkidle' });
   check(await mobilePage.locator('#experience').evaluate((node) => node.classList.contains('is-visible')), '移动端核心页面可见');
-  check(await mobilePage.locator('.timeline-wrap').evaluate((node) => node.scrollWidth > node.clientWidth), '移动端时间轴可横向滚动');
+  check(await mobilePage.locator('.timeline-wrap').evaluate((node) => {
+    const wrapRect = node.getBoundingClientRect();
+    return [...node.querySelectorAll('.timeline-node')].every((item) => {
+      const rect = item.getBoundingClientRect();
+      return rect.left >= wrapRect.left - 1 && rect.right <= wrapRect.right + 1;
+    });
+  }), '移动端时间轴三个时代节点全部可见');
   check(await mobilePage.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1), '移动端页面没有整体横向溢出');
   check(await mobilePage.evaluate(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches), '减少动画媒体设置生效');
   await mobilePage.locator('#open-search').click();

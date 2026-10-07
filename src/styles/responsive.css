@@ -1,34 +1,48 @@
 @media (max-width: 760px) {
-  .topbar, .experience { width: calc(100% - 32px); }
+  .topbar, .experience, .site-footer { width: calc(100% - 32px); }
   .topbar { padding: 20px 0; }
   .eyebrow { display: none; }
   .topbar-meta { gap: 0; }
   .intro-screen { min-height: calc(100vh - 68px); padding: 30px 18px 80px; }
   .mobile-only { display: block; }
+  .intro-rings { width: min(400px, 92vw); }
+  .intro-rings i { font-size: 10px; }
   .intro-screen h1 { font-size: clamp(48px, 15vw, 76px); }
   .intro-copy { font-size: 16px; }
   .scene-header { display: block; margin-bottom: 20px; }
   .scene-header h2 { font-size: 32px; }
   .scene-actions { margin-top: 20px; }
-  .map-stage { min-height: 320px; border-radius: 7px; }
-  .map-svg { min-height: 320px; }
-  .map-svg text { font-size: 11px; }
-  .map-annotation { font-size: 10px; }
-  .map-annotation small { display: none; }
-  .annotation-1 { left: 7%; top: 18%; }
-  .annotation-2 { right: 7%; bottom: 23%; }
-  .map-stamp { left: 16px; bottom: 18px; font-size: 9px; }
-  .compare-button { right: 16px; bottom: 16px; padding: 10px 12px; font-size: 12px; }
+  .map-stage { min-height: 0; border-radius: 7px; }
+  .map-svg { min-height: 0; max-height: none; }
+  .map-svg text { font-size: 15px; }
+  .map-era-char { font-size: 96px; left: 10px; top: auto; bottom: 8px; transform: none; opacity: .8; }
+  .map-seal { top: 14px; left: 14px; padding: 5px 4px; font-size: 12px; }
+  .map-quote { position: static; transform: none; writing-mode: horizontal-tb; white-space: normal; margin: 12px 16px 2px; font-size: 13px; letter-spacing: .18em; text-align: center; }
+  .map-quote::before, .map-quote::after { margin: 0 6px; }
+  .ring-label { font-size: 18px; }
+  .compass { display: none; }
+  .map-stamp { left: 14px; bottom: 14px; font-size: 9px; }
+  .expand-button { top: 46px; right: 12px; width: 38px; height: 38px; }
+  .compare-button { right: 12px; bottom: 12px; padding: 9px 11px; font-size: 12px; }
+  .overlay-panel { flex-wrap: wrap; gap: 10px 14px; padding: 12px 14px; }
+  .overlay-panel label { width: 100%; justify-content: space-between; }
+  .overlay-panel input[type='range'] { flex: 1 1 100%; }
+  .panel-foot { display: none; }
   .timeline-wrap { padding: 26px 4px 0; margin-inline: -4px; overflow-x: auto; overflow-y: visible; scrollbar-width: none; }
   .timeline-wrap::-webkit-scrollbar { display: none; }
   .timeline-heading { align-items: flex-start; flex-direction: column; gap: 6px; }
-  .timeline { min-width: 520px; }
+  .timeline { min-width: 340px; }
+  .timeline-node { min-width: 78px; }
+  .node-year { font-size: 14px; }
+  .overlay-control { right: 12px; bottom: 58px; width: calc(100% - 24px); }
+  .overlay-panel { padding: 20px 16px; }
   .bottom-grid { grid-template-columns: 1fr; margin-top: 34px; }
   .story-card, .model-card { min-height: auto; padding: 18px; }
   .story-content { gap: 14px; margin-top: 18px; }
-  .story-avatar { width: 42px; height: 42px; font-size: 17px; }
+  .story-avatar { width: 40px; height: 40px; font-size: 17px; }
   .story-content h3 { font-size: 18px; }
   .story-content p { font-size: 13px; }
+  .site-footer { flex-direction: column; gap: 6px; padding: 20px 0 28px; }
   .overlay-control { padding: 12px; }
   .overlay-panel { padding: 22px 18px; }
   .search-drawer .drawer-inner, .sources-drawer .drawer-inner { padding: 26px 18px; }
