@@ -179,7 +179,7 @@ app.innerHTML = `
             </g>
             <rect x="86" y="42" width="828" height="500" rx="8" class="map-frame"/>
           </svg>
-          <div class="map-stamp">示意重绘<br />不代表现实边界</div>
+          <div class="map-stamp">古今图对照<br />不作现实边界主张</div>
           <button class="expand-button" id="expand-map" aria-label="放大查看地图" title="放大查看地图">⤢</button>
           <button class="compare-button" id="compare-button"><span class="compare-icon">◐</span><span>掀开古今对照</span></button>
           <div class="overlay-control" id="overlay-control" aria-hidden="true"><div class="overlay-panel"><div class="panel-heading"><div><p class="card-label">古今叠层</p><h3>掀开古图，对照今图</h3></div><button class="close-button" id="close-overlay" aria-label="关闭古今叠层">×</button></div><p id="overlay-desc">古图为已核验的公版原图（禹迹图 / 坤舆万国全图），与今图未做严格配准，仅作视觉叠合；方位与比例的真实差异本身就是历史。</p><label for="opacity-range">向下拖动掀开古图，露出今图 · 古图浓度 <output id="opacity-output">100%</output></label><input id="opacity-range" type="range" min="0" max="100" value="100"/><div class="panel-foot"><span>今图 · Natural Earth 实测地理</span><span>古图 · 传世原图</span></div></div></div>
@@ -209,7 +209,7 @@ app.innerHTML = `
       <span class="footer-note">底图与古图均为核验过的公有领域数据</span>
     </footer>
 
-    <div class="map-lightbox" id="map-lightbox" aria-hidden="true"><button class="close-button lightbox-close" id="close-lightbox" aria-label="关闭放大地图">×</button><p class="lightbox-hint">点按空白处关闭 · 示意重绘，不代表现实边界</p><div class="lightbox-body" id="lightbox-body"></div></div>
+    <div class="map-lightbox" id="map-lightbox" aria-hidden="true"><button class="close-button lightbox-close" id="close-lightbox" aria-label="关闭放大地图">×</button><p class="lightbox-hint">点按空白处关闭 · 古今图对照，不作现实边界主张</p><div class="lightbox-body" id="lightbox-body"></div></div>
 
     <div class="search-drawer" id="search-drawer" aria-hidden="true"><div class="drawer-inner"><div class="panel-heading"><div><p class="card-label">地名查询</p><h3>查一个地名的前世</h3></div><button class="close-button" id="close-search" aria-label="关闭地名查询">×</button></div><label class="search-field"><span>输入古今名称</span><input id="place-search" type="search" placeholder="例如：燕京 / 北京" autocomplete="off"/><span class="search-key">${/Mac|iPhone|iPad/.test(navigator.platform) ? '⌘ K' : 'Ctrl K'}</span></label><div class="search-suggestions" id="search-suggestions"></div><div class="search-results" id="search-results"></div></div></div>
 
