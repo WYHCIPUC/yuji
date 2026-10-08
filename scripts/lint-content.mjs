@@ -112,7 +112,7 @@ if (existsSync(basemapPath)) {
 // 历代图卷：字段完整、素材存在、许可在白名单内
 const atlasData = JSON.parse(readFileSync(join(contentDir, 'atlas.json'), 'utf8'));
 const ATLAS_LICENSES = ['Public domain', 'CC0', 'CC BY 3.0', 'CC BY-SA 3.0', 'CC BY-SA 4.0'];
-check(Array.isArray(atlasData) && atlasData.length >= 30, `atlas.json 收录至少 30 幅历代地图（当前 ${Array.isArray(atlasData) ? atlasData.length : 0} 幅）`);
+check(Array.isArray(atlasData) && atlasData.length >= 40, `atlas.json 收录至少 40 幅历代地图（当前 ${Array.isArray(atlasData) ? atlasData.length : 0} 幅）`);
 const atlasIds = new Set();
 atlasData.forEach((item, index) => {
   const label = `atlas.json 第 ${index + 1} 条（${item?.id ?? '?'}）`;
