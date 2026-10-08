@@ -198,6 +198,7 @@ button:focus-visible, input:focus-visible, [tabindex]:focus-visible { outline: 2
 .story-content p, .story-source, .model-card p { color: var(--muted); line-height: 1.7; }
 .story-content p { margin: 0 0 10px; max-width: 560px; }
 .story-source { display: block; color: var(--muted-dark); font-size: 11px; }
+.story-years { display: block; margin-top: 6px; color: var(--gold); font-size: 11px; }
 .model-switch { display: flex; gap: 6px; margin: 24px 0 16px; }
 .model-tab { padding: 8px 12px; border: 1px solid var(--line); border-radius: 4px; color: var(--muted); font-size: 12px; }
 .model-tab.is-active { color: var(--ink); border-color: var(--gold); background: var(--gold); }

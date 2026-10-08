@@ -83,7 +83,7 @@ app.innerHTML = `
           <span style="--ring: 4; --lx: 79%; --ly: 21%"><i>要</i></span>
           <span style="--ring: 5; --lx: 85%; --ly: 15%"><i>荒</i></span>
         </div>
-        <p class="kicker">从想象到测量 · 公元前 11 世纪—1602 年</p>
+        <p class="kicker">从想象到测量 · 约公元前 1600—公元 1602</p>
         <h1 id="intro-title">何谓天下？</h1>
         <p class="intro-copy">拖动时间轴，看古人眼中的世界<br class="mobile-only" />如何一点点长成地球。</p>
         <button class="primary-button" id="start-button"><span>开始探索</span><span class="arrow">→</span></button>
@@ -197,7 +197,7 @@ app.innerHTML = `
         <div class="bottom-grid">
           <article class="story-card" id="story-card">
             <div class="card-label">制图者引路</div>
-            <div class="story-content"><div class="story-avatar">${sealChar(initialStory.name)}</div><div><h3>${initialStory.name}<small class="story-role">${initialStory.role}</small></h3><p>${initialStory.text}</p><small class="story-source">${initialStory.source}</small></div></div>
+            <div class="story-content"><div class="story-avatar">${sealChar(initialStory.name)}</div><div><h3>${initialStory.name}<small class="story-role">${initialStory.role}</small></h3><p>${initialStory.text}</p><small class="story-years">${initialStory.years}</small><small class="story-source">${initialStory.source}</small></div></div>
           </article>
           <article class="model-card"><div class="card-label">天下模型 · 示意</div><div class="model-switch" role="tablist"><button class="model-tab is-active" data-model="服制" role="tab" aria-selected="true">五服</button><button class="model-tab" data-model="郡县" role="tab" aria-selected="false">郡县</button><button class="model-tab" data-model="地圆" role="tab" aria-selected="false">地圆</button></div><p id="model-copy">以中心向外层层展开，天下首先是一种关系秩序。</p></article>
         </div>
@@ -229,6 +229,7 @@ const storyAvatar = document.querySelector<HTMLElement>('.story-avatar')!;
 const storyName = document.querySelector<HTMLElement>('.story-content h3')!;
 const storyText = document.querySelector<HTMLElement>('.story-content p')!;
 const storySource = document.querySelector<HTMLElement>('.story-source')!;
+const storyYears = document.querySelector<HTMLElement>('.story-years')!;
 const progress = document.querySelector<HTMLElement>('#timeline-progress')!;
 const cursor = document.querySelector<HTMLElement>('#timeline-cursor')!;
 const timeline = document.querySelector<HTMLElement>('#timeline')!;
@@ -264,6 +265,7 @@ function renderEra(index: number) {
   storyName.innerHTML = `${story.name}<small class="story-role">${story.role}</small>`;
   storyText.textContent = story.text;
   storySource.textContent = story.source;
+  storyYears.textContent = story.years ?? '';
   const ratio = currentEra / (eras.length - 1);
   const nodes = document.querySelectorAll<HTMLElement>('.timeline-node');
   const dot = nodes[currentEra]?.querySelector<HTMLElement>('.node-dot');

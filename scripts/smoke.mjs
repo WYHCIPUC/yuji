@@ -38,7 +38,7 @@ try {
 
   const timeline = page.locator('#timeline');
   const bounds = await timeline.boundingBox();
-  if (bounds) await page.mouse.click(bounds.x + bounds.width - 8, bounds.y + bounds.height / 2);
+  if (bounds) await timeline.click({ position: { x: bounds.width - 8, y: bounds.height / 2 } });
   check(await page.locator('.app-shell').getAttribute('data-era') === 'kunyu', '拖动/点击时间轴末端后进入 1602 年');
   check((await page.locator('#overlay-image').getAttribute('href')).includes('kunyu'), '1602 年叠层加载《坤舆万国全图》原图');
   check(await page.locator('#ancient-overlay').evaluate((node) => !node.classList.contains('is-off')), '有古图时代的叠层未被隐藏');

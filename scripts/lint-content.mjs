@@ -62,8 +62,8 @@ const storytellers = readJson('storytellers.json');
 check(Array.isArray(storytellers) && storytellers.length > 0, 'storytellers.json 是非空数组');
 storytellers.forEach((person, index) => {
   const label = `storytellers.json 第 ${index + 1} 条`;
-  ['name', 'role', 'text', 'source'].forEach((field) => {
-    check(isFilled(person?.[field]), `${label} 的 ${field} 为非空字符串`);
+  ['name', 'role', 'text', 'source', 'years'].forEach((field) => {
+    check(isFilled(person?.[field]), `${label} 的 ${field} 为非空字符串（years 为年代注记，用于防止时代错配）`);
   });
 });
 
