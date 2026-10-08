@@ -2,6 +2,7 @@ import eras from './content/eras.json';
 import places from './content/places.json';
 import storytellers from './content/storytellers.json';
 import sources from './content/sources.json';
+import atlas from './content/atlas.json';
 import basemap from './content/basemap.json';
 import './styles/tokens.css';
 import './styles/global.css';
@@ -66,12 +67,19 @@ function sealChar(name: string): string {
 
 const initialStory = storytellerOf(eras[currentEra].id);
 
+// 历代图卷条目（atlas.json）；note 为可选项。
+type AtlasItem = { id: string; period: string; years: string; type: string; file: string; author: string; license: string; source: string; note?: string };
+function atlasCard(item: AtlasItem): string {
+  const badge = item.type === '存世图件' ? 'is-artifact' : item.type === '近代出版图件' ? 'is-early' : 'is-redraw';
+  return `<figure class="atlas-item"><img loading="lazy" src="${item.file}" alt="${item.period}时期历史地图"/><figcaption><span class="atlas-years">${item.years}</span><strong>${item.period}</strong><em class="atlas-type ${badge}">${item.type}</em>${item.note ? `<p>${item.note}</p>` : ''}<small>${item.author} · ${item.license}</small><a href="${item.source}" target="_blank" rel="noreferrer">图源 ↗</a></figcaption></figure>`;
+}
+
 app.innerHTML = `
   <div class="app-shell" data-era="${eras[currentEra].id}">
     <div class="grain" aria-hidden="true"></div>
     <header class="topbar">
       <a class="brand" href="#" aria-label="禹迹首页"><span class="brand-mark">禹</span><span>禹迹</span></a>
-      <div class="topbar-meta"><span class="eyebrow">历史地理交互叙事 · 原型 0.3</span><button class="text-button" id="open-sources">来源与说明</button></div>
+      <div class="topbar-meta"><span class="eyebrow">历史地理交互叙事 · 原型 0.3</span><button class="text-button" id="open-atlas">历代图卷</button><button class="text-button" id="open-sources">来源与说明</button></div>
     </header>
 
     <main>
@@ -212,6 +220,8 @@ app.innerHTML = `
     <div class="map-lightbox" id="map-lightbox" aria-hidden="true"><button class="close-button lightbox-close" id="close-lightbox" aria-label="关闭放大地图">×</button><p class="lightbox-hint">点按空白处关闭 · 古今图对照，不作现实边界主张</p><div class="lightbox-body" id="lightbox-body"></div></div>
 
     <div class="search-drawer" id="search-drawer" aria-hidden="true"><div class="drawer-inner"><div class="panel-heading"><div><p class="card-label">地名查询</p><h3>查一个地名的前世</h3></div><button class="close-button" id="close-search" aria-label="关闭地名查询">×</button></div><label class="search-field"><span>输入古今名称</span><input id="place-search" type="search" placeholder="例如：燕京 / 北京" autocomplete="off"/><span class="search-key">${/Mac|iPhone|iPad/.test(navigator.platform) ? '⌘ K' : 'Ctrl K'}</span></label><div class="search-suggestions" id="search-suggestions"></div><div class="search-results" id="search-results"></div></div></div>
+
+    <div class="atlas-drawer" id="atlas-drawer" aria-hidden="true"><div class="drawer-inner atlas-inner"><div class="panel-heading"><div><p class="card-label">历代图卷</p><h3>中国历代历史地图 · ${atlas.length} 幅</h3></div><button class="close-button" id="close-atlas" aria-label="关闭历代图卷">×</button></div><p class="drawer-intro">按时期先后排列。标注「存世图件」为传世古地图原件；「重绘形势图」为今人依据公开历史地理研究重绘；「近代出版图件」为二十世纪初出版之历史地图集。图件均取自维基共享资源，逐幅标注作者与许可；古往今来的边界画法存在学术争议，本卷不作任何现实边界主张。</p><div class="atlas-grid">${atlas.map((item) => atlasCard(item as AtlasItem)).join('')}</div></div></div>
 
     <div class="sources-drawer" id="sources-drawer" aria-hidden="true"><div class="drawer-inner"><div class="panel-heading"><div><p class="card-label">来源与说明</p><h3>每一条线，都有来处</h3></div><button class="close-button" id="close-sources" aria-label="关闭来源与说明">×</button></div><p class="drawer-intro">当前为原型数据。正式发布前，所有图片、字体、文字和配准成果都需要再次核验许可。</p><div class="source-list">${sources.map((source) => `<article class="source-item"><div class="source-type">${source.type}</div><div><h4>${source.title}</h4><p>${source.detail}</p><span class="source-status">${source.status}</span></div></article>`).join('')}</div><div class="source-note"><strong>说明</strong><p>历史边界、地名对应和人物独白可能存在争议。产品会把确定事实、合理解释、学术争议和产品化演绎分开标记。</p></div></div></div>
   </div>
@@ -385,6 +395,10 @@ document.querySelector<HTMLButtonElement>('#open-search')!.addEventListener('cli
 document.querySelector<HTMLButtonElement>('#close-search')!.addEventListener('click', () => setDrawer(searchDrawer, false));
 document.querySelector<HTMLButtonElement>('#open-sources')!.addEventListener('click', () => setDrawer(sourcesDrawer, true));
 document.querySelector<HTMLButtonElement>('#close-sources')!.addEventListener('click', () => setDrawer(sourcesDrawer, false));
+const atlasDrawer = document.querySelector<HTMLElement>('#atlas-drawer')!;
+document.querySelector<HTMLButtonElement>('#open-atlas')!.addEventListener('click', () => setDrawer(atlasDrawer, true));
+document.querySelector<HTMLButtonElement>('#close-atlas')!.addEventListener('click', () => setDrawer(atlasDrawer, false));
+atlasDrawer.addEventListener('click', (event) => { if (event.target === atlasDrawer) setDrawer(atlasDrawer, false); });
 placeSearch.addEventListener('input', () => { searchTerm = placeSearch.value; renderResults(searchTerm); });
 searchSuggestions.addEventListener('click', (event) => { const target = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-place]'); if (!target) return; placeSearch.value = target.dataset.place ?? ''; placeSearch.dispatchEvent(new Event('input')); });
 document.querySelectorAll<SVGGElement>('.map-place').forEach((node) => {
@@ -480,7 +494,7 @@ timeline.addEventListener('pointerup', (event) => {
   timeline.releasePointerCapture(event.pointerId);
 });
 timeline.addEventListener('pointercancel', () => { timelineDragging = false; timeline.classList.remove('is-dragging'); });
-document.addEventListener('keydown', (event) => { if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); setDrawer(searchDrawer, true); placeSearch.focus(); renderResults(); } if (event.key === 'Escape') { overlayControl.classList.remove('is-open'); overlayControl.setAttribute('aria-hidden', 'true'); sourcesDrawer.classList.remove('is-open'); searchDrawer.classList.remove('is-open'); document.body.classList.remove('drawer-open'); closeLightbox(); } });
+document.addEventListener('keydown', (event) => { if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); setDrawer(searchDrawer, true); placeSearch.focus(); renderResults(); } if (event.key === 'Escape') { overlayControl.classList.remove('is-open'); overlayControl.setAttribute('aria-hidden', 'true'); sourcesDrawer.classList.remove('is-open'); atlasDrawer.classList.remove('is-open'); searchDrawer.classList.remove('is-open'); document.body.classList.remove('drawer-open'); closeLightbox(); } });
 document.querySelector<HTMLAnchorElement>('.brand')!.addEventListener('click', (event) => { event.preventDefault(); intro.classList.remove('is-hidden'); experience.classList.remove('is-visible'); hasStarted = false; });
 window.addEventListener('resize', () => renderEra(currentEra));
 

@@ -81,6 +81,13 @@ try {
   await page.locator('#open-sources').click();
   check(await page.locator('#sources-drawer').evaluate((node) => node.classList.contains('is-open')), '来源抽屉可打开');
   await page.keyboard.press('Escape');
+  await page.locator('#open-atlas').click();
+  check(await page.locator('#atlas-drawer').evaluate((node) => node.classList.contains('is-open')), '历代图卷抽屉可打开');
+  check(await page.locator('.atlas-item').count() >= 20, '历代图卷收录不少于 20 幅');
+  await page.waitForTimeout(1200);
+  check(await page.locator('.atlas-item img').first().evaluate((img) => img.naturalWidth > 0), '图卷图片真实加载');
+  await page.keyboard.press('Escape');
+  check(!(await page.locator('#atlas-drawer').evaluate((node) => node.classList.contains('is-open'))), 'Escape 可关闭历代图卷');
   check(!(await page.locator('#sources-drawer').evaluate((node) => node.classList.contains('is-open'))), 'Escape 可以关闭来源抽屉');
   await page.keyboard.press('Control+KeyK');
   check(await page.locator('#search-drawer').evaluate((node) => node.classList.contains('is-open')), 'Ctrl+K 可以打开地名查询');

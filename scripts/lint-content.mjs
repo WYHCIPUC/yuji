@@ -109,6 +109,26 @@ if (existsSync(basemapPath)) {
   check(typeof basemap.projection?.scale === 'number' && basemap.projection.scale > 0, 'basemap 投影参数有效');
 }
 
+// 历代图卷：字段完整、素材存在、许可在白名单内
+const atlasData = JSON.parse(readFileSync(join(contentDir, 'atlas.json'), 'utf8'));
+const ATLAS_LICENSES = ['Public domain', 'CC0', 'CC BY 3.0', 'CC BY-SA 3.0', 'CC BY-SA 4.0'];
+check(Array.isArray(atlasData) && atlasData.length >= 20, `atlas.json 收录至少 20 幅历代地图（当前 ${Array.isArray(atlasData) ? atlasData.length : 0} 幅）`);
+const atlasIds = new Set();
+atlasData.forEach((item, index) => {
+  const label = `atlas.json 第 ${index + 1} 条（${item?.id ?? '?'}）`;
+  ['id', 'period', 'years', 'type', 'file', 'author', 'license', 'source'].forEach((field) => {
+    check(isFilled(item?.[field]), `${label} 的 ${field} 为非空字符串`);
+  });
+  if (isFilled(item?.id)) {
+    if (atlasIds.has(item.id)) check(false, `${label} 的 id 重复`);
+    atlasIds.add(item.id);
+  }
+  check(ATLAS_LICENSES.includes(item?.license), `${label} 的许可在白名单内（${ATLAS_LICENSES.join(' / ')}）`);
+  check(/^https:\/\/commons\.wikimedia\.org\//.test(item?.source ?? ''), `${label} 的 source 指向维基共享资源`);
+  check(['存世图件', '重绘形势图', '近代出版图件'].includes(item?.type), `${label} 的 type 属于三类之一`);
+  check(existsSync(join(root, 'public', item?.file ?? '/nonexistent')), `图卷素材存在：${item?.file}`);
+});
+
 if (failures.length) {
   console.error(`\n内容数据校验失败：${failures.length} 项`);
   process.exit(1);
