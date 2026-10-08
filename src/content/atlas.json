@@ -42,6 +42,17 @@
     "source": "https://commons.wikimedia.org/wiki/File:Warring_States_350_BC.png"
   },
   {
+    "id": "zhaoyutu",
+    "period": "战国 · 中山国",
+    "years": "约前 310",
+    "type": "存世图件",
+    "note": "错金银铜版兆域图——现存最早的建筑平面规划图，中山王陵园规划",
+    "file": "assets/maps/atlas/zhaoyutu.jpg",
+    "author": "战国中山国工匠；河北平山出土，藏河北博物院",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:%E9%94%99%E9%87%91%E9%93%B6%E9%93%9C%E7%89%88%E5%85%86%E5%9F%9F%E5%9B%BE.jpg"
+  },
+  {
     "id": "qin",
     "period": "秦",
     "years": "前 221—前 207",
@@ -173,6 +184,17 @@
     "source": "https://commons.wikimedia.org/wiki/File:Map_of_the_Sui_Dynasty.png"
   },
   {
+    "id": "tang660",
+    "period": "唐",
+    "years": "618—907 · 约 660 年",
+    "type": "重绘形势图",
+    "note": "唐帝国与安西等都护府（约 660 年）",
+    "file": "assets/maps/atlas/tang660.jpg",
+    "author": "Kanguole（英文维基），底图 Natural Earth（公有领域）",
+    "license": "CC0",
+    "source": "https://commons.wikimedia.org/wiki/File:Map_of_the_Tang_Empire_and_its_Protectorates_circa_660_CE.png"
+  },
+  {
     "id": "tang",
     "period": "唐",
     "years": "618—907 · 约 700 年",
@@ -215,6 +237,17 @@
     "author": "Kanguole（英文维基），底图 Natural Earth（公有领域）",
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Map_of_the_Tang_dynasty_(900).png"
+  },
+  {
+    "id": "herrmann-liang",
+    "period": "五代十国",
+    "years": "907—923 · 后梁",
+    "type": "近代出版图件",
+    "note": "Herrmann 图册五代第一分期：后梁时期",
+    "file": "assets/maps/atlas/herrmann-liang.jpg",
+    "author": "Albert Herrmann & Georg Westermann",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:The_Five_Dynasties_I_Period_of_Later_Liang_907-923_AD.jpg"
   },
   {
     "id": "wudai",
@@ -303,6 +336,17 @@
     "author": "Yu Ninjie（中文维基）",
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Map_of_China_1142.jpg"
+  },
+  {
+    "id": "dilitu",
+    "period": "南宋",
+    "years": "1190",
+    "type": "存世图件",
+    "note": "黄裳《地理图》碑——苏州文庙四大宋碑之一，刻于 1247（图成于 1190）",
+    "file": "assets/maps/atlas/dilitu.jpg",
+    "author": "黄裳作图；碑藏苏州碑刻博物馆；摄影 Siyuwj",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:%E5%9B%9B%E5%A4%A7%E5%AE%8B%E7%A2%91%E2%80%94%E2%80%94%E5%9C%B0%E7%90%86%E5%9B%BE%EF%BC%8C2016-05-15.jpg"
   },
   {
     "id": "pingjiang",
@@ -426,6 +470,17 @@
     "source": "https://commons.wikimedia.org/wiki/File:%E5%BB%A3%E8%BC%BF%E5%9C%96%E8%BC%BF%E5%9C%B0%E7%B8%BD%E5%9C%96.jpg"
   },
   {
+    "id": "guangyu-fujian",
+    "period": "明",
+    "years": "1558",
+    "type": "存世图件",
+    "note": "《广舆图》福建分省页——图集分省测绘之例",
+    "file": "assets/maps/atlas/guangyu-fujian.jpg",
+    "author": "朱思本图系 / 罗洪先增纂",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Guang_Yutu_1558_Vol_1_Pg_45_Fujian_2.jpg"
+  },
+  {
     "id": "kunyu-artifact",
     "period": "明",
     "years": "1602",
@@ -435,6 +490,28 @@
     "author": "利玛窦；日本东北大学狩野文库藏本",
     "license": "Public domain",
     "source": "https://commons.wikimedia.org/wiki/File:Kunyu_Wanguo_Quantu_(%E5%9D%A4%E8%BC%BF%E8%90%AC%E5%9C%8B%E5%85%A8%E5%9C%96).jpg"
+  },
+  {
+    "id": "kangxi-zhili",
+    "period": "清",
+    "years": "1718 测绘（1941 影印）",
+    "type": "存世图件",
+    "note": "康熙《皇舆全览图》直隶幅——耶稣会士全国实测的成果（福克斯影印本，美国国会图书馆藏）",
+    "file": "assets/maps/atlas/kangxi-zhili.jpg",
+    "author": "康熙朝耶稣会测绘；Walter Fuchs 1941 影印",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Der_Jesuiten-Atlas_der_Kanghsi-Zeit_-_China_und_die_Aussenlaender_LOC_74650033-21.jpg"
+  },
+  {
+    "id": "kangxi-sichuan",
+    "period": "清",
+    "years": "1718 测绘（1941 影印）",
+    "type": "存世图件",
+    "note": "康熙《皇舆全览图》四川幅",
+    "file": "assets/maps/atlas/kangxi-sichuan.jpg",
+    "author": "康熙朝耶稣会测绘；Walter Fuchs 1941 影印",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Der_Jesuiten-Atlas_der_Kanghsi-Zeit_-_China_und_die_Aussenlaender_LOC_74650033-34.jpg"
   },
   {
     "id": "homann1735",
