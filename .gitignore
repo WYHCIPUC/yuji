@@ -4,3 +4,4 @@ artifacts/
 release/_check/
 *.tsbuildinfo
 .DS_Store
+.mimosa/
