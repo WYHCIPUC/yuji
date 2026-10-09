@@ -100,6 +100,13 @@
 
   同一数据在数据集级 CC0 标注与内容级学术条款并存，法务口径不明。**本项目按红线取保守读法：以 EULA（学术、非商业、禁再分发原始数据）为准**；若日后取得权利方书面确认 CC0 有效，可放宽。
 
+#### 2b. 府级治所点与府级政区多边形（2026-10-09 同日核验，主用层扩展）
+
+- **V6 Time Series Prefecture Points**，doi:10.7910/DVN/WW1PD6（读取接口同上格式，访问日期 2026-10-09）：许可字段 CC0 1.0；条款文本原文 "V6 Time Series Prefecture Points (shapefile) Version 6 [2016] © CHGIS, Fairbank Center for Chinese Studies (Harvard University) and the Center for Historical Geographical Studies at Fudan University. ... Free for academic research, no commercial use, resale, or redistribution permitted."；文件 `v6_time_pref_pts_utf_wgs84.zip` 无访问限制；官方描述明示点位为 GENERALIZED（概化）位置。
+- **V6 Time Series Prefecture Polygons**，doi:10.7910/DVN/I0Q7SM（访问日期 2026-10-09）：许可字段 CC0 1.0；条款文本同族（©哈佛+复旦，学术免费，详见 EULA）；文件 `v6_time_pref_polygons_utf_wgs84.zip` 无访问限制；**官方描述明示多边形由治所点 Voronoi 邻近分配生成、"NOT the actual administrative boundaries"**——采用时必须以「示意重绘」口径展示。
+- 两集与县点同样存在 CC0 元数据/条款文本冲突，处置同上：按 EULA 保守执行。
+- 其余候选（数据字典 SNCEAU、明代卫所 5RUXK8、驿站 SB8ZTM、茶马道 VJHPVK、谭图索引 3KAHBT、TGAZ H3OB28、Hartwell 29302、纪年表 SC7AOU 等）的用途分层与排除清单见 [gis-resource-map.md](gis-resource-map.md)，**逐集许可待核验，采用任一前先回本表登记**。
+
 #### 3. 复旦侧核验状态（2026-10-09）
 
 - 专站 `https://chgis.fudan.edu.cn/`：页面仅显示"网站维护中......"，许可文本当日不可核验
