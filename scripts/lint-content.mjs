@@ -98,16 +98,16 @@ if (overlayBlock) {
   overlaySrcs.forEach((src) => check(existsSync(join(root, 'public', src)), `古图素材存在：${src}`));
 }
 
-// 真实地理底图数据必须存在且非空
-const basemapPath = join(root, 'src', 'content', 'basemap.json');
-check(existsSync(basemapPath), 'basemap.json 存在');
-if (existsSync(basemapPath)) {
-  const basemap = JSON.parse(readFileSync(basemapPath, 'utf8'));
-  check(Array.isArray(basemap.coast) && basemap.coast.length > 0, 'basemap 海岸线数据非空');
-  check(Array.isArray(basemap.rivers) && basemap.rivers.length > 0, 'basemap 河流数据非空');
-  check(Array.isArray(basemap.lakes) && basemap.lakes.length > 0, 'basemap 湖泊数据非空');
-  check(typeof basemap.projection?.scale === 'number' && basemap.projection.scale > 0, 'basemap 投影参数有效');
+// 地图引擎 GeoJSON（MapLibre 数据源）必须存在且非空
+for (const geoName of ['land', 'rivers', 'coast', 'grow-rivers', 'lakes']) {
+  const geoPath = join(root, 'public', 'geo', `${geoName}.json`);
+  check(existsSync(geoPath), `地图数据存在：geo/${geoName}.json`);
+  if (existsSync(geoPath)) {
+    const fc = JSON.parse(readFileSync(geoPath, 'utf8'));
+    check(Array.isArray(fc.features) && fc.features.length > 0, `地图数据非空：geo/${geoName}.json`);
+  }
 }
+check(existsSync(join(root, 'public', 'assets', 'maps', 'yujitu-1136-loc.jpg')), '禹迹图配准用图存在');
 
 // 历代图卷：字段完整、素材存在、许可在白名单内
 const atlasData = JSON.parse(readFileSync(join(contentDir, 'atlas.json'), 'utf8'));

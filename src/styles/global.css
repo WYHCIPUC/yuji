@@ -55,10 +55,10 @@ button:focus-visible, input:focus-visible, [tabindex]:focus-visible { outline: 2
 .map-stage::before { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 1; background:
   radial-gradient(120% 90% at 50% 45%, transparent 58%, rgba(10, 10, 8, .38)),
   repeating-linear-gradient(0deg, rgba(240, 232, 215, .013) 0 1px, transparent 1px 4px); }
-.map-svg { position: relative; display: block; width: 100%; height: auto; min-height: 430px; }
+#map { position: absolute; inset: 0; }
 .map-paper { fill: url(#paper-vignette); opacity: .85; }
 .map-frame { fill: none; stroke: rgba(240,232,215,.24); stroke-width: 1; }
-.map-svg text { fill: rgba(240, 232, 215, .8); font-size: 14px; font-family: var(--font-serif); }
+
 .mountain-haze { fill: none; stroke: rgba(156, 164, 154, .13); stroke-width: 50; filter: url(#soft-glow); }
 .haze-2 { stroke-width: 34; opacity: .65; }
 .mountain-range { fill: none; stroke: rgba(197, 164, 91, .2); stroke-width: 1.6; stroke-linecap: round; opacity: .5; }
@@ -94,13 +94,13 @@ button:focus-visible, input:focus-visible, [tabindex]:focus-visible { outline: 2
 .compass-needle { fill: rgba(181, 72, 50, .8); }
 .compass-cross { fill: rgba(240, 232, 215, .22); }
 .compass-n { fill: rgba(216, 194, 154, .6); font-size: 10px; text-anchor: middle; }
-.map-place { cursor: pointer; transition: opacity var(--dur-scene) var(--ease-ink); }
-.map-place .place-hit { fill: transparent; pointer-events: all; }
-.map-place .place-dot { fill: var(--vermilion); opacity: .75; transition: opacity var(--dur-fast) ease; }
-.map-place .place-label { font-size: 17px; paint-order: stroke; stroke: rgba(226, 206, 166, .6); stroke-width: 4px; transition: fill var(--dur-fast) ease; }
+.map-place { display: flex; align-items: center; gap: 5px; cursor: pointer; font-family: var(--font-serif); transition: opacity .9s var(--ease-ink); will-change: opacity; }
+.map-place .place-hit { display: none; }
+.map-place .place-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--vermilion); opacity: .75; box-shadow: 0 0 10px rgba(181,72,50,.55); transition: opacity var(--dur-fast) ease; }
+.map-place .place-label { font-size: 13px; color: rgba(240, 232, 215, .88); text-shadow: 0 1px 3px rgba(0,0,0,.8), 0 0 6px rgba(0,0,0,.6); transition: color var(--dur-fast) ease; white-space: nowrap; }
 .map-place:hover .place-dot, .map-place:focus-visible .place-dot { opacity: 1; }
-.map-place:hover .place-label, .map-place:focus-visible .place-label { fill: var(--vermilion-bright); }
-.map-place .place-dot { transform-box: fill-box; transform-origin: center; }
+.map-place:hover .place-label, .map-place:focus-visible .place-label { color: var(--vermilion-bright); }
+.map-place .place-dot { transform-origin: center; }
 .map-place.is-pulse .place-dot { animation: dot-pulse 1.5s var(--ease) 2; }
 @keyframes dot-pulse { 0% { transform: scale(1); } 40% { transform: scale(2); } 100% { transform: scale(1); } }
 .ancient-overlay { opacity: .55; transition: opacity .35s ease; pointer-events: none; }
@@ -119,11 +119,7 @@ button:focus-visible, input:focus-visible, [tabindex]:focus-visible { outline: 2
 .app-shell[data-era="kunyu"] .globe-curvature { opacity: 1; }
 .app-shell[data-era="kunyu"] .globe-arc { stroke: rgba(136, 167, 155, .62); stroke-width: 2; }
 .app-shell[data-era="kunyu"] .globe-line { stroke: rgba(136, 167, 155, .38); }
-.app-shell[data-era="qinhan"] .map-place .place-label,
-.app-shell[data-era="suitang"] .map-place .place-label,
-.app-shell[data-era="yujitu"] .map-place .place-label,
-.app-shell[data-era="mingchu"] .map-place .place-label,
-.app-shell[data-era="kunyu"] .map-place .place-label { fill: rgba(48, 42, 31, .92); font-weight: 600; }
+
 .app-shell[data-era="kunyu"] .map-stage::before { background:
   radial-gradient(115% 85% at 50% 45%, transparent 42%, rgba(8, 8, 6, .62)),
   repeating-linear-gradient(0deg, rgba(240, 232, 215, .013) 0 1px, transparent 1px 4px); }
@@ -276,7 +272,10 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
 .map-lightbox { position: fixed; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center; overflow: auto; background: rgba(12, 11, 9, .94); opacity: 0; visibility: hidden; transition: opacity .3s ease, visibility .3s ease; }
 .map-lightbox.is-open { opacity: 1; visibility: visible; }
 .lightbox-body { width: min(1400px, 96vw); padding: 24px 0 40px; }
-.lightbox-body .map-svg { width: 100%; height: auto; min-height: 0; cursor: grab; }
+.lightbox-body .lightbox-figure { margin: 0; }
+.lightbox-body .lightbox-figure img { display: block; max-width: 100%; max-height: 74vh; margin: 0 auto; border: 1px solid var(--line); }
+.lightbox-body .lightbox-figure figcaption { margin-top: 12px; color: var(--muted); font-size: 12px; text-align: center; }
+.lightbox-empty { color: var(--muted); text-align: center; padding: 60px 20px; }
 .lightbox-close { position: fixed; top: 22px; right: 26px; background: rgba(23, 22, 20, .7); }
 .lightbox-hint { position: fixed; left: 0; right: 0; bottom: 20px; margin: 0; color: var(--muted-dark); font-size: 11px; letter-spacing: .1em; text-align: center; pointer-events: none; }
 
@@ -285,7 +284,7 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
 .ancient-overlay.is-off { display: none; }
 .overlay-image { opacity: .95; }
 .overlay-caption { font-size: 13px; fill: rgba(240, 232, 215, .72); }
-.wufu-rings, .shanhai-layer, .map-places, .route-layer { transition: opacity .9s var(--ease); }
+.shanhai-layer { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 
 /* 山海星野（战国《山海经》想象层） */
 .shanhai-path { fill: none; stroke: rgba(138, 127, 181, .32); stroke-width: 1; stroke-dasharray: 4 8; }
