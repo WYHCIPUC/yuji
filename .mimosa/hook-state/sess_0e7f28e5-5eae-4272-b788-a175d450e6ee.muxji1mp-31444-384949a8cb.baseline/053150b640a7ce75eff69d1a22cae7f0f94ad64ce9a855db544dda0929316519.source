@@ -1,12 +1,12 @@
 {
   "name": "yuji-timeline-prototype",
-  "version": "0.5.0",
+  "version": "0.1.1",
   "lockfileVersion": 3,
   "requires": true,
   "packages": {
     "": {
       "name": "yuji-timeline-prototype",
-      "version": "0.5.0",
+      "version": "0.1.1",
       "devDependencies": {
         "playwright-core": "^1.63.0",
         "typescript": "^5.6.3",

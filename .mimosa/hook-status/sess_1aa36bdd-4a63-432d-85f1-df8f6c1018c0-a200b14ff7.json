@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "mimosa-hook-status/v1",
+  "recordedAt": "2026-10-09T01:38:17.772Z",
+  "sessionId": "sess_1aa36bdd-4a63-432d-85f1-df8f6c1018c0",
+  "event": "PostToolUse",
+  "toolName": "Edit",
+  "file": "docs/scope-freeze.md",
+  "outcome": "clear",
+  "coverage": "complete",
+  "findingCount": 0,
+  "durationMs": 6,
+  "hostState": "hook_complete",
+  "reportHint": ".mimosa/reports/"
+}

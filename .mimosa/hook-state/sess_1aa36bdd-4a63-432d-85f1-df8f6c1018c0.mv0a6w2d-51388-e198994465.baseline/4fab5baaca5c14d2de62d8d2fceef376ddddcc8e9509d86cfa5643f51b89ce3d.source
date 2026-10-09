@@ -33,40 +33,20 @@ const mapPlaces = [
 const geoLayer = `<g class="geo-layer"><g class="geo-land">${basemap.land.map((d: string) => `<path d="${d}"/>`).join('')}</g><g class="geo-coast">${basemap.coast.map((d: string) => `<path d="${d}"/>`).join('')}</g><g class="geo-lakes">${basemap.lakes.map((lake: { d: string }) => `<path d="${lake.d}"/>`).join('')}</g><g class="geo-rivers">${basemap.rivers.map((river: { name: string; d: string }) => `<path d="${river.d}" data-river="${river.name}"/>`).join('')}</g></g>`;
 
 // 天下模型与时代的默认对应；用户仍可手动切换。
-const modelByEra: Record<string, string> = { shangzhou: '服制', zhanguo: '想象', qinhan: '郡县', suitang: '画方', yujitu: '画方', mingchu: '针路', kunyu: '地圆' };
+const modelByEra: Record<string, string> = { shangzhou: '服制', yujitu: '郡县', kunyu: '地圆' };
 const modelCopy: Record<string, string> = {
   服制: '以中心向外层层展开，天下首先是一种关系秩序。',
-  想象: '昆仑居中，四海之外皆是奇国——世界先被想象，再被丈量。',
   郡县: '世界被分成可以管理、丈量和征调的地方单元。',
-  画方: '计里画方，每方折地百里——比例成为地图的语言。',
-  针路: '以罗盘方位与更数记程，海图上每一段航线都有针字为凭。',
   地圆: '大地不再有边缘，而是一个可以绕行一周的球体。',
 };
 
 // 时代单字水印：填充地图卡左侧留白，与右侧竖排引文对称。
-const eraChar: Record<string, string> = { shangzhou: '商', zhanguo: '海', qinhan: '秦', suitang: '唐', yujitu: '宋', mingchu: '航', kunyu: '明' };
+const eraChar: Record<string, string> = { shangzhou: '商', yujitu: '宋', kunyu: '明' };
 
 // 真实古图层：已核验公有领域素材（许可与出处见 NOTICE.md 和来源抽屉），素材文件由 scripts/lint-content.mjs 校验存在。
-// 图幅统一为地图内框，preserveAspectRatio=meet 自动等比适配。
-const eraOverlayImage: Record<string, { src: string; caption: string }> = {
-  qinhan: { src: 'assets/maps/atlas/qin.jpg', caption: '秦疆域图（前 221 年）· 重绘 · CC BY-SA' },
-  suitang: { src: 'assets/maps/atlas/tang660.jpg', caption: '唐帝国与都护府（约 660 年）· 重绘 · CC0' },
-  yujitu: { src: 'assets/maps/yujitu-1136-loc.jpg', caption: '《禹迹图》1136 年石刻 · 美国国会图书馆藏拓 · 公有领域' },
-  mingchu: { src: 'assets/maps/atlas/maokun-sumatra.jpg', caption: '《郑和航海图》苏门答腊段 · 《武备志》· 公有领域' },
-  kunyu: { src: 'assets/maps/kunyu-wanguo-1602.jpg', caption: '《坤舆万国全图》 · 1602 · 公有领域' },
-};
-
-// 七幕「生长」强度向量：拖动时间轴时相邻两幕连续插值——神话淡出、实测淡入。
-// 字段：rings 五服环 / stars 山海星野 / geo 实测地理 / places 地名 / overlay 古图 / routes 针路。
-interface EraIntensity { rings: number; stars: number; geo: number; places: number; overlay: number; routes: number }
-const eraIntensity: Record<string, EraIntensity> = {
-  shangzhou: { rings: 0.95, stars: 0.25, geo: 0.08, places: 0.14, overlay: 0, routes: 0 },
-  zhanguo: { rings: 0.2, stars: 0.9, geo: 0.12, places: 0.16, overlay: 0, routes: 0 },
-  qinhan: { rings: 0, stars: 0.08, geo: 0.55, places: 0.6, overlay: 0.95, routes: 0 },
-  suitang: { rings: 0, stars: 0, geo: 0.6, places: 0.72, overlay: 0.95, routes: 0 },
-  yujitu: { rings: 0, stars: 0, geo: 0.5, places: 0.85, overlay: 1, routes: 0 },
-  mingchu: { rings: 0, stars: 0, geo: 0.8, places: 0.8, overlay: 0.9, routes: 1 },
-  kunyu: { rings: 0, stars: 0, geo: 0.85, places: 0.9, overlay: 0.95, routes: 0.12 },
+const eraOverlayImage: Record<string, { src: string; caption: string; x: number; y: number; w: number; h: number; cx: number; cy: number }> = {
+  yujitu: { src: 'assets/maps/yujitu-1136-loc.jpg', caption: '《禹迹图》1136 年石刻 · 美国国会图书馆藏拓 · 公有领域', x: 287, y: 52, w: 426, h: 480, cx: 287, cy: 536 },
+  kunyu: { src: 'assets/maps/kunyu-wanguo-1602.jpg', caption: '《坤舆万国全图》 · 1602 · 公有领域', x: 130, y: 125, w: 740, h: 332, cx: 130, cy: 480 },
 };
 
 const app = document.querySelector<HTMLDivElement>('#app');
@@ -158,15 +138,6 @@ app.innerHTML = `
               <path class="terra-incognita" d="M86 396 C132 380 164 416 154 470 C146 512 104 532 86 516 Z"/>
               <path class="terra-incognita" d="M560 42 C620 30 690 38 720 58 C688 78 610 84 566 70 C550 60 548 48 560 42 Z"/>
               ${geoLayer}
-              <g class="shanhai-layer" id="shanhai-layer" aria-hidden="true">
-                <path class="shanhai-path" d="M214 132 Q320 86 452 104 Q560 118 668 96 Q780 76 862 128"/>
-                <circle class="shanhai-star" cx="214" cy="132" r="4"/><circle class="shanhai-star" cx="452" cy="104" r="3"/><circle class="shanhai-star" cx="668" cy="96" r="4"/><circle class="shanhai-star" cx="862" cy="128" r="3"/>
-                <circle class="shanhai-star" cx="560" cy="428" r="3.5"/><circle class="shanhai-star" cx="806" cy="392" r="3"/>
-                <text class="shanhai-label" x="196" y="116">昆仑</text>
-                <text class="shanhai-label" x="430" y="88">流沙</text>
-                <text class="shanhai-label" x="540" y="448">羽民国</text>
-                <text class="shanhai-label" x="786" y="412">烛龙</text>
-              </g>
               <g class="wufu-rings">
                 <circle cx="480" cy="290" r="250" class="ring-fill fill-5"/>
                 <circle cx="480" cy="290" r="205" class="ring-fill fill-4"/>
@@ -212,17 +183,7 @@ app.innerHTML = `
                 <text y="42" class="compass-n">午</text>
               </g>
               <g class="map-places">${mapPlaces.map((place) => `<g class="map-place" data-place="${place.name}" role="button" tabindex="0" aria-label="查询地名：${place.name}"><circle class="place-hit" cx="${place.x}" cy="${place.y}" r="${place.hit}"/><circle class="place-dot" cx="${place.x}" cy="${place.y}" r="8"/><text class="place-label" x="${place.x - 16}" y="${place.y - 16}">${place.name}</text></g>`).join('')}</g>
-              <g class="ancient-overlay" id="ancient-overlay"><g class="overlay-real"><image id="overlay-image" class="overlay-image" x="86" y="42" width="828" height="500" preserveAspectRatio="xMidYMid meet" href="assets/maps/yujitu-1136-loc.jpg"/><text id="overlay-caption" x="94" y="536" class="overlay-caption">《禹迹图》1136 年石刻 · 美国国会图书馆藏拓 · 公有领域</text></g></g>
-              <g class="route-layer" id="route-layer" aria-hidden="true">
-                <path id="zhenghe-route" class="route-line" d="M738 296 Q716 336 668 366 Q636 392 618 424 Q606 470 604 540"/>
-                <circle class="route-port" cx="738" cy="296" r="5"/>
-                <circle class="route-port" cx="668" cy="366" r="4"/>
-                <circle class="route-port" cx="618" cy="424" r="4"/>
-                <text class="route-label" x="712" y="290">龙江关 · 刘家港</text>
-                <text class="route-label" x="640" y="384">占城 · 满剌加 →</text>
-                <text class="route-label" x="612" y="520">往锡兰 · 忽鲁谟斯 · 东非</text>
-                <circle class="route-ship" r="5"><animateMotion dur="7s" repeatCount="indefinite" path="M738 296 Q716 336 668 366 Q636 392 618 424 Q606 470 604 540"/></circle>
-              </g>
+              <g class="ancient-overlay" id="ancient-overlay"><g class="overlay-real"><image id="overlay-image" class="overlay-image" x="287" y="52" width="426" height="480" preserveAspectRatio="xMidYMid meet" href="assets/maps/yujitu-1136-loc.jpg"/><text id="overlay-caption" x="287" y="536" class="overlay-caption">《禹迹图》1136 年石刻 · 美国国会图书馆藏拓 · 公有领域</text></g></g>
             </g>
             <rect x="86" y="42" width="828" height="500" rx="8" class="map-frame"/>
           </svg>
@@ -246,7 +207,7 @@ app.innerHTML = `
             <div class="card-label">制图者引路</div>
             <div class="story-content"><div class="story-avatar">${sealChar(initialStory.name)}</div><div><h3>${initialStory.name}<small class="story-role">${initialStory.role}</small></h3><p>${initialStory.text}</p><small class="story-years">${initialStory.years}</small><small class="story-source">${initialStory.source}</small></div></div>
           </article>
-          <article class="model-card"><div class="card-label">天下模型 · 示意</div><div class="model-switch" role="tablist">${['服制', '想象', '郡县', '画方', '针路', '地圆'].map((model, index) => `<button class="model-tab ${index === 0 ? 'is-active' : ''}" data-model="${model}" role="tab" aria-selected="${index === 0}">${model}</button>`).join('')}</div><p id="model-copy">以中心向外层层展开，天下首先是一种关系秩序。</p></article>
+          <article class="model-card"><div class="card-label">天下模型 · 示意</div><div class="model-switch" role="tablist"><button class="model-tab is-active" data-model="服制" role="tab" aria-selected="true">五服</button><button class="model-tab" data-model="郡县" role="tab" aria-selected="false">郡县</button><button class="model-tab" data-model="地圆" role="tab" aria-selected="false">地圆</button></div><p id="model-copy">以中心向外层层展开，天下首先是一种关系秩序。</p></article>
         </div>
       </section>
     </main>
@@ -286,6 +247,10 @@ const ancientOverlay = document.querySelector<HTMLElement>('#ancient-overlay')!;
 const overlayImage = document.querySelector<SVGImageElement>('#overlay-image')!;
 const overlayCaption = document.querySelector<SVGTextElement>('#overlay-caption')!;
 
+function eraOverlayFactor(index: number): number {
+  // 古图为主角：有图时代默认近全显；掀开对照（滑杆向下）才露出今图。商周无传世地图。
+  return index === 0 ? 0 : index === 1 ? 1 : 0.95;
+}
 const overlayControl = document.querySelector<HTMLElement>('#overlay-control')!;
 const searchDrawer = document.querySelector<HTMLElement>('#search-drawer')!;
 const sourcesDrawer = document.querySelector<HTMLElement>('#sources-drawer')!;
@@ -293,62 +258,9 @@ const placeSearch = document.querySelector<HTMLInputElement>('#place-search')!;
 const searchResults = document.querySelector<HTMLElement>('#search-results')!;
 const searchSuggestions = document.querySelector<HTMLElement>('#search-suggestions')!;
 
-const ringsEl = document.querySelector<HTMLElement>('.wufu-rings')!;
-const starsLayer = document.querySelector<HTMLElement>('#shanhai-layer')!;
-const geoLayerEl = document.querySelector<HTMLElement>('.geo-layer')!;
-const placesEl = document.querySelector<HTMLElement>('.map-places')!;
-const routeLayer = document.querySelector<HTMLElement>('#route-layer')!;
-
-function lerp(a: number, b: number, t: number): number { return a + (b - a) * t; }
-
-function intensityAt(pos: number): EraIntensity {
-  const clamped = Math.max(0, Math.min(eras.length - 1, pos));
-  const lo = Math.floor(clamped);
-  const hi = Math.min(eras.length - 1, lo + 1);
-  const f = clamped - lo;
-  const a = eraIntensity[eras[lo].id] ?? eraIntensity.shangzhou;
-  const b = eraIntensity[eras[hi].id] ?? a;
-  return { rings: lerp(a.rings, b.rings, f), stars: lerp(a.stars, b.stars, f), geo: lerp(a.geo, b.geo, f), places: lerp(a.places, b.places, f), overlay: lerp(a.overlay, b.overlay, f), routes: lerp(a.routes, b.routes, f) };
-}
-
-// 「生长」核心：把强度向量实时应用到六个图层（掀开对照的滑杆浓度在 overlay 中生效）。
-function applyIntensities(v: EraIntensity) {
-  ringsEl.style.opacity = String(v.rings);
-  starsLayer.style.opacity = String(v.stars);
-  geoLayerEl.style.opacity = String(v.geo);
-  placesEl.style.opacity = String(v.places);
-  routeLayer.style.opacity = String(v.routes);
-  ancientOverlay.style.opacity = String(overlayOpacity * v.overlay);
-  ancientOverlay.classList.toggle('is-off', v.overlay <= 0.001);
-}
-
-// 各节点圆心在轨道上的百分比（视口实测），用于游标/进度条的连续定位。
-function nodeCenters(): number[] {
-  const trackRect = timeline.getBoundingClientRect();
-  const centers: number[] = [];
-  document.querySelectorAll<HTMLElement>('.timeline-node').forEach((node) => {
-    const dot = node.querySelector<HTMLElement>('.node-dot');
-    if (trackRect.width > 0 && dot) {
-      const r = dot.getBoundingClientRect();
-      centers.push(((r.left + r.width / 2 - trackRect.left) / trackRect.width) * 100);
-    } else centers.push(0);
-  });
-  return centers.length ? centers : [0, 50, 100];
-}
-
-function alignedAt(pos: number): number {
-  const centers = nodeCenters();
-  const lo = Math.max(0, Math.min(centers.length - 1, Math.floor(pos)));
-  const hi = Math.min(centers.length - 1, lo + 1);
-  return lerp(centers[lo], centers[hi], Math.max(0, Math.min(1, pos - lo)));
-}
-
-let continuousPos = currentEra;
-
-// 文案层：标题、讲述者、模型、古图切换、节点激活。索引变化时才调用。
-function applyEraTexts(index: number) {
-  currentEra = index;
-  const era: Era = eras[index];
+function renderEra(index: number) {
+  currentEra = Math.max(0, Math.min(eras.length - 1, index));
+  const era: Era = eras[currentEra];
   const story = storytellerOf(era.id);
   shell.dataset.era = era.id;
   title.textContent = era.title;
@@ -364,15 +276,36 @@ function applyEraTexts(index: number) {
   storyText.textContent = story.text;
   storySource.textContent = story.source;
   storyYears.textContent = story.years ?? '';
+  const ratio = currentEra / (eras.length - 1);
+  const nodes = document.querySelectorAll<HTMLElement>('.timeline-node');
+  const dot = nodes[currentEra]?.querySelector<HTMLElement>('.node-dot');
+  // 游标与进度条对齐节点圆心；用视口实测坐标，避免 offsetLeft 受定位父级影响。
+  let aligned = ratio * 100;
+  if (dot) {
+    const dotRect = dot.getBoundingClientRect();
+    const trackRect = timeline.getBoundingClientRect();
+    if (trackRect.width > 0) aligned = ((dotRect.left + dotRect.width / 2 - trackRect.left) / trackRect.width) * 100;
+  }
   const real = eraOverlayImage[era.id];
   if (real) {
-    if (overlayImage.getAttribute('href') !== real.src) overlayImage.setAttribute('href', real.src);
+    overlayImage.setAttribute('href', real.src);
+    overlayImage.setAttribute('x', String(real.x));
+    overlayImage.setAttribute('y', String(real.y));
+    overlayImage.setAttribute('width', String(real.w));
+    overlayImage.setAttribute('height', String(real.h));
+    overlayCaption.setAttribute('x', String(real.cx));
+    overlayCaption.setAttribute('y', String(real.cy));
     overlayCaption.textContent = real.caption;
+    ancientOverlay.classList.remove('is-off');
+  } else {
+    ancientOverlay.classList.add('is-off');
   }
-  timeline.setAttribute('aria-valuenow', String(index));
-  document.querySelectorAll<HTMLButtonElement>('.timeline-node').forEach((node, nodeIndex) => node.classList.toggle('is-active', nodeIndex === index));
-  const hints: Record<string, string> = { shangzhou: '向右拖动，看世界从秩序想象中长出来', zhanguo: '星野与奇国：先被想象的世界', qinhan: '郡县成网，无名绘者开始画大地', suitang: '一寸折百里，比例成为语言', yujitu: '计里画方——掀开对照看真迹拓本', mingchu: '针路通四海，看航线驶出图框', kunyu: '世界打开了，地球开始有了弧度' };
-  document.querySelector<HTMLElement>('#timeline-hint')!.textContent = hints[era.id] ?? '向右拖动，观察世界变得可测';
+  ancientOverlay.style.opacity = String(overlayOpacity * eraOverlayFactor(currentEra));
+  progress.style.width = `${aligned}%`;
+  cursor.style.left = `${aligned}%`;
+  timeline.setAttribute('aria-valuenow', String(currentEra));
+  document.querySelectorAll<HTMLButtonElement>('.timeline-node').forEach((node, nodeIndex) => node.classList.toggle('is-active', nodeIndex === currentEra));
+  document.querySelector<HTMLElement>('#timeline-hint')!.textContent = currentEra === 1 ? '山川被量进了格子，试试掀开古今对照' : currentEra === 2 ? '世界打开了，地球开始有了弧度' : '向右拖动，观察世界变得可测';
   const eraModel = modelByEra[era.id] ?? '服制';
   document.querySelectorAll<HTMLButtonElement>('.model-tab').forEach((tab) => {
     const active = tab.dataset.model === eraModel;
@@ -380,28 +313,7 @@ function applyEraTexts(index: number) {
     tab.setAttribute('aria-selected', String(active));
   });
   document.querySelector<HTMLElement>('#model-copy')!.textContent = modelCopy[eraModel];
-  localStorage.setItem('yuji-era', String(index));
-}
-
-function renderEra(index: number) {
-  const idx = Math.max(0, Math.min(eras.length - 1, index));
-  continuousPos = idx;
-  applyEraTexts(idx);
-  applyIntensities(intensityAt(idx));
-  const aligned = alignedAt(idx);
-  progress.style.width = `${aligned}%`;
-  cursor.style.left = `${aligned}%`;
-}
-
-// 连续渲染：拖动时在相邻两幕之间插值，文案在跨过中点时切换。
-function renderContinuous(pos: number) {
-  continuousPos = Math.max(0, Math.min(eras.length - 1, pos));
-  applyIntensities(intensityAt(continuousPos));
-  const aligned = alignedAt(continuousPos);
-  progress.style.width = `${aligned}%`;
-  cursor.style.left = `${aligned}%`;
-  const idx = Math.round(continuousPos);
-  if (idx !== currentEra) applyEraTexts(idx);
+  localStorage.setItem('yuji-era', String(currentEra));
 }
 
 function startExperience() {
@@ -466,7 +378,7 @@ document.querySelector<HTMLButtonElement>('#compare-button')!.addEventListener('
   if (hasRealMap && overlayOpacity < 0.9) {
     overlayOpacity = 0.9;
     range.value = '90';
-    applyIntensities(intensityAt(continuousPos));
+    ancientOverlay.style.opacity = String(overlayOpacity * Math.max(eraOverlayFactor(currentEra), 0.9));
     document.querySelector<HTMLOutputElement>('#opacity-output')!.textContent = '90%';
   }
 });
@@ -474,7 +386,9 @@ document.querySelector<HTMLButtonElement>('#close-overlay')!.addEventListener('c
 overlayControl.addEventListener('click', (event) => { if (event.target === overlayControl) { overlayControl.classList.remove('is-open'); overlayControl.setAttribute('aria-hidden', 'true'); renderEra(currentEra); } });
 document.querySelector<HTMLInputElement>('#opacity-range')!.addEventListener('input', (event) => {
   overlayOpacity = Number((event.target as HTMLInputElement).value) / 100;
-  applyIntensities(intensityAt(continuousPos));
+  const compareMode = overlayControl.classList.contains('is-open');
+  const factor = compareMode ? Math.max(eraOverlayFactor(currentEra), 0.9) : eraOverlayFactor(currentEra);
+  ancientOverlay.style.opacity = String(overlayOpacity * factor);
   document.querySelector<HTMLOutputElement>('#opacity-output')!.textContent = `${Math.round(overlayOpacity * 100)}%`;
 });
 document.querySelector<HTMLButtonElement>('#open-search')!.addEventListener('click', () => { setDrawer(searchDrawer, true); placeSearch.focus(); renderResults(); });
@@ -558,12 +472,12 @@ searchResults.addEventListener('click', (event) => {
   window.setTimeout(() => dot.classList.remove('is-pulse'), 3600);
 });
 
-timeline.addEventListener('keydown', (event) => { if (event.key === 'ArrowRight') { event.preventDefault(); renderEra(Math.round(continuousPos) + 1); } if (event.key === 'ArrowLeft') { event.preventDefault(); renderEra(Math.round(continuousPos) - 1); } if (event.key === 'Home') { event.preventDefault(); renderEra(0); } if (event.key === 'End') { event.preventDefault(); renderEra(eras.length - 1); } });
+timeline.addEventListener('keydown', (event) => { if (event.key === 'ArrowRight') { event.preventDefault(); renderEra(currentEra + 1); } if (event.key === 'ArrowLeft') { event.preventDefault(); renderEra(currentEra - 1); } if (event.key === 'Home') { event.preventDefault(); renderEra(0); } if (event.key === 'End') { event.preventDefault(); renderEra(eras.length - 1); } });
 let timelineDragging = false;
 function updateEraFromPointer(clientX: number) {
   const bounds = timeline.getBoundingClientRect();
   const ratio = Math.max(0, Math.min(1, (clientX - bounds.left) / bounds.width));
-  renderContinuous(ratio * (eras.length - 1));
+  renderEra(Math.round(ratio * (eras.length - 1)));
 }
 timeline.addEventListener('pointerdown', (event) => {
   timelineDragging = true;

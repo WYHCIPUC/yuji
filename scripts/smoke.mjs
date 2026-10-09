@@ -23,9 +23,15 @@ try {
   await page.locator('#start-button').click();
   check(await page.locator('#experience').evaluate((node) => node.classList.contains('is-visible')), '点击开始后进入时间轴');
 
+  check(await page.locator('.timeline-node').count() === 7, '时间轴展示七个时代节点');
+
   await page.locator('.timeline-node[data-index="1"]').click();
-  check(await page.locator('.app-shell').getAttribute('data-era') === 'yujitu', '点击 1136 年后时代状态正确');
-  check((await page.locator('#era-title').textContent()).includes('格子'), '时代标题已更新');
+  check(await page.locator('.app-shell').getAttribute('data-era') === 'zhanguo', '点击战国后时代状态正确');
+  check((await page.locator('#era-title').textContent()).includes('奇国'), '战国标题已更新');
+  check(Number(await page.locator('#shanhai-layer').evaluate((n) => n.style.opacity)) > 0.5, '战国山海星野层可见');
+
+  await page.locator('.timeline-node[data-index="2"]').click();
+  check((await page.locator('#overlay-image').getAttribute('href')).includes('atlas/qin'), '秦汉幕加载秦疆域图');
   check(await page.locator('.geo-coast path').count() > 10, '真实地理底图海岸线已渲染');
   check(await page.locator('.geo-rivers path').count() > 10, '真实地理底图河流已渲染');
   const dotCx = async (name) => Number(await page.locator(`.map-place[data-place="${name}"] .place-dot`).getAttribute('cx'));
@@ -33,6 +39,16 @@ try {
   check((await dotCx('燕京')) > (await dotCx('长安')), '地名方位正确：燕京在长安以东');
   check((await dotCx('敦煌')) < (await dotCx('洛阳')), '地名方位正确：敦煌在洛阳以西');
   check((await dotCy('临安')) > (await dotCy('燕京')), '地名方位正确：临安在燕京以南');
+  check((await page.locator('.story-content h3').textContent()).includes('无名绘者'), '秦汉幕讲述者为马王堆无名绘者');
+
+  await page.locator('.timeline-node[data-index="5"]').click();
+  check(await page.locator('.app-shell').getAttribute('data-era') === 'mingchu', '点击明初后时代状态正确');
+  check(Number(await page.locator('#route-layer').evaluate((n) => n.style.opacity)) > 0.5, '明初郑和针路层可见');
+  check(await page.locator('.route-ship').count() === 1, '针路航船动画存在');
+  check((await page.locator('.story-content h3').textContent()).includes('郑和'), '明初幕讲述者为郑和');
+
+  await page.locator('.timeline-node[data-index="4"]').click();
+  check((await page.locator('#era-title').textContent()).includes('格子'), '1136 幕标题已更新');
   check((await page.locator('#overlay-image').getAttribute('href')).includes('yujitu'), '1136 年叠层加载《禹迹图》原图');
   check(await page.evaluate(() => fetch('assets/maps/yujitu-1136-loc.jpg', { method: 'HEAD' }).then((response) => response.status)) === 200, '《禹迹图》素材文件可访问');
 
@@ -75,7 +91,7 @@ try {
 
   await page.locator('#timeline').focus();
   await page.keyboard.press('ArrowRight');
-  check(await page.locator('.app-shell').getAttribute('data-era') === 'yujitu', '时间轴方向键可以切换时代');
+  check(await page.locator('.app-shell').getAttribute('data-era') === 'zhanguo', '时间轴方向键可以切换时代');
   await page.keyboard.press('Home');
   check(await page.locator('.app-shell').getAttribute('data-era') === 'shangzhou', '时间轴 Home 键可以回到起点');
   await page.locator('#open-sources').click();
@@ -104,7 +120,7 @@ try {
       const rect = item.getBoundingClientRect();
       return rect.left >= wrapRect.left - 1 && rect.right <= wrapRect.right + 1;
     });
-  }), '移动端时间轴三个时代节点全部可见');
+  }), '移动端时间轴七个时代节点全部可见');
   check(await mobilePage.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1), '移动端页面没有整体横向溢出');
   check(await mobilePage.evaluate(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches), '减少动画媒体设置生效');
   await mobilePage.locator('#open-search').click();
@@ -115,7 +131,7 @@ try {
   const resumePage = await context.newPage();
   await resumePage.setViewportSize({ width: 1280, height: 900 });
   await resumePage.goto(`${url}?stage=experience`, { waitUntil: 'networkidle' });
-  await resumePage.evaluate(() => localStorage.setItem('yuji-era', '1'));
+  await resumePage.evaluate(() => localStorage.setItem('yuji-era', '4'));
   await resumePage.goto(url, { waitUntil: 'networkidle' });
   check(await resumePage.locator('#resume-button').isVisible(), '重新打开时显示继续入口');
   check((await resumePage.locator('#resume-button').textContent()).includes('1136'), '继续入口显示上次时代');

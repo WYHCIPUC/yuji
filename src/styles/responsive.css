@@ -28,12 +28,12 @@
   .overlay-panel label { width: 100%; justify-content: space-between; }
   .overlay-panel input[type='range'] { flex: 1 1 100%; }
   .panel-foot { display: none; }
-  .timeline-wrap { padding: 26px 4px 0; margin-inline: -4px; overflow-x: auto; overflow-y: visible; scrollbar-width: none; }
-  .timeline-wrap::-webkit-scrollbar { display: none; }
+  .timeline-wrap { padding: 26px 4px 0; margin-inline: -4px; overflow-y: visible; }
   .timeline-heading { align-items: flex-start; flex-direction: column; gap: 6px; }
-  .timeline { min-width: 340px; }
-  .timeline-node { min-width: 78px; }
-  .node-year { font-size: 14px; }
+  .timeline { min-width: 0; gap: 2px; }
+  .timeline-node { min-width: 0; flex: 1 1 0; }
+  .node-year { font-size: 12px; }
+  .node-caption { display: none; }
   .overlay-control { right: 12px; bottom: 58px; width: calc(100% - 24px); }
   .overlay-panel { padding: 20px 16px; }
   .bottom-grid { grid-template-columns: 1fr; margin-top: 34px; }

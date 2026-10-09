@@ -109,48 +109,21 @@ button:focus-visible, input:focus-visible, [tabindex]:focus-visible { outline: 2
 .overlay-title { fill: rgba(88, 52, 28, .85) !important; font-size: 26px !important; letter-spacing: .3em; }
 .overlay-subtitle { fill: rgba(98, 58, 32, .6) !important; font-size: 12px !important; letter-spacing: .18em; }
 
-/* 三时代结构差异：同心圆秩序 → 画方实测 → 球面世界 */
-.app-shell[data-era="shangzhou"] .grid-lines { opacity: 0; }
-.app-shell[data-era="shangzhou"] .territory { opacity: 0; }
-.app-shell[data-era="shangzhou"] .river { opacity: 0; stroke-dashoffset: 1200; }
-.app-shell[data-era="shangzhou"] .river-future { opacity: 0; stroke-dashoffset: 900; }
-.app-shell[data-era="shangzhou"] .ocean-wash { opacity: 0; }
-.app-shell[data-era="shangzhou"] .mountain-range { opacity: .34; }
-.app-shell[data-era="shangzhou"] .map-place { opacity: 0; }
-.app-shell[data-era="shangzhou"] .wufu-rings { opacity: 1; transform: scale(1); }
-.app-shell[data-era="shangzhou"] .globe-curvature { opacity: 0; }
-.app-shell[data-era="shangzhou"] .compass { opacity: 0; }
+/* 七幕分层：六大图层（五服环/山海星野/实测地理/地名/古图/针路）由 JS 连续插值控制透明度 */
+.grid-lines { opacity: .25; transition: opacity 1s var(--ease); }
+.app-shell[data-era="zhanguo"] .grid-lines { opacity: 0; }
+.app-shell[data-era="qinhan"] .grid-lines { opacity: .45; }
 .app-shell[data-era="yujitu"] .grid-lines { opacity: 1; stroke: rgba(150, 58, 40, .55); stroke-width: 1.2; stroke-dasharray: none; }
-.app-shell[data-era="yujitu"] .territory { opacity: .45; stroke: rgba(52, 42, 28, .6); stroke-width: 1.5; }
-.app-shell[data-era="yujitu"] .territory-west { fill: #8a6849; }
-.app-shell[data-era="yujitu"] .territory-east { fill: #647f72; }
-.app-shell[data-era="yujitu"] .river { opacity: .84; stroke-dashoffset: 0; }
-.app-shell[data-era="yujitu"] .ocean-wash { opacity: 0; }
-.app-shell[data-era="yujitu"] .terra-incognita { opacity: 0; }
-.app-shell[data-era="yujitu"] .mountain-range { opacity: .5; stroke-width: 2; }
-.app-shell[data-era="yujitu"] .mountain-haze { opacity: .05; }
-.app-shell[data-era="yujitu"] .haze-2 { opacity: .04; }
-.app-shell[data-era="yujitu"] .map-place { opacity: .9; }
-.app-shell[data-era="yujitu"] .map-place .place-label { fill: rgba(48, 42, 31, .92); font-weight: 600; }
-.app-shell[data-era="yujitu"] .wufu-rings { opacity: 0; transform: scale(.94); }
-.app-shell[data-era="yujitu"] .globe-curvature { opacity: 0; }
-.app-shell[data-era="yujitu"] .compass { opacity: 0; }
-.app-shell[data-era="kunyu"] .grid-lines { opacity: .22; }
-.app-shell[data-era="kunyu"] .territory { opacity: .6; stroke: rgba(44, 36, 24, .65); stroke-width: 1.5; }
-.app-shell[data-era="kunyu"] .river { opacity: .9; stroke-dashoffset: 0; }
-.app-shell[data-era="kunyu"] .river-future { opacity: .88; stroke-dashoffset: 0; }
-.app-shell[data-era="kunyu"] .ocean-wash { opacity: 1; }
-.app-shell[data-era="kunyu"] .terra-incognita { opacity: 1; }
-.app-shell[data-era="kunyu"] .mountain-range { opacity: .3; }
-.app-shell[data-era="kunyu"] .mountain-haze { opacity: .06; }
-.app-shell[data-era="kunyu"] .haze-2 { opacity: .05; }
-.app-shell[data-era="kunyu"] .map-place { opacity: .96; }
-.app-shell[data-era="kunyu"] .map-place .place-label { fill: rgba(48, 42, 31, .92); font-weight: 600; }
-.app-shell[data-era="kunyu"] .wufu-rings { opacity: 0; transform: scale(.94); }
+.compass { opacity: .6; }
+.globe-curvature { opacity: 0; transition: opacity 1s var(--ease); }
 .app-shell[data-era="kunyu"] .globe-curvature { opacity: 1; }
 .app-shell[data-era="kunyu"] .globe-arc { stroke: rgba(136, 167, 155, .62); stroke-width: 2; }
 .app-shell[data-era="kunyu"] .globe-line { stroke: rgba(136, 167, 155, .38); }
-.app-shell[data-era="kunyu"] .compass { opacity: .9; }
+.app-shell[data-era="qinhan"] .map-place .place-label,
+.app-shell[data-era="suitang"] .map-place .place-label,
+.app-shell[data-era="yujitu"] .map-place .place-label,
+.app-shell[data-era="mingchu"] .map-place .place-label,
+.app-shell[data-era="kunyu"] .map-place .place-label { fill: rgba(48, 42, 31, .92); font-weight: 600; }
 .app-shell[data-era="kunyu"] .map-stage::before { background:
   radial-gradient(115% 85% at 50% 45%, transparent 42%, rgba(8, 8, 6, .62)),
   repeating-linear-gradient(0deg, rgba(240, 232, 215, .013) 0 1px, transparent 1px 4px); }
@@ -312,6 +285,20 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
 .ancient-overlay.is-off { display: none; }
 .overlay-image { opacity: .95; }
 .overlay-caption { font-size: 13px; fill: rgba(240, 232, 215, .72); }
+.wufu-rings, .shanhai-layer, .map-places, .route-layer { transition: opacity .9s var(--ease); }
+
+/* 山海星野（战国《山海经》想象层） */
+.shanhai-path { fill: none; stroke: rgba(138, 127, 181, .32); stroke-width: 1; stroke-dasharray: 4 8; }
+.shanhai-star { fill: #b9a8e8; opacity: .8; }
+.shanhai-label { font-size: 13px; fill: rgba(185, 168, 232, .78); letter-spacing: .2em; }
+
+/* 郑和针路（明初航海层） */
+.route-layer { pointer-events: none; }
+.route-line { fill: none; stroke: rgba(63, 127, 143, .92); stroke-width: 2.2; stroke-dasharray: 10 7; stroke-linecap: round; animation: route-flow 2.2s linear infinite; }
+@keyframes route-flow { to { stroke-dashoffset: -17; } }
+.route-port { fill: #3f7f8f; }
+.route-label { font-size: 12px; fill: rgba(122, 170, 180, .92); letter-spacing: .06em; }
+.route-ship { fill: #e8d9a0; stroke: rgba(63, 127, 143, .9); stroke-width: 1.5; }
 
 /* 真实地理底图（Natural Earth 公有领域数据，等距圆柱投影，见 scripts/build-basemap.mjs） */
 .geo-layer { transition: opacity 1s var(--ease); }
