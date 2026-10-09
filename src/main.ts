@@ -59,14 +59,15 @@ const eraOverlayImage: Record<string, { src: string; caption: string }> = {
 // 七幕「生长」强度向量：拖动时间轴时相邻两幕连续插值——神话淡出、实测淡入。
 // 字段：rings 五服环 / stars 山海星野 / geo 实测地理 / places 地名 / overlay 古图 / routes 针路。
 interface EraIntensity { rings: number; stars: number; geo: number; places: number; overlay: number; routes: number }
+// 主角是「会生长的矢量世界」；真实古图默认收起（overlay=可用性 0/1），点「掀开对照」才由滑杆叠上来。
 const eraIntensity: Record<string, EraIntensity> = {
   shangzhou: { rings: 0.95, stars: 0.25, geo: 0.08, places: 0.14, overlay: 0, routes: 0 },
   zhanguo: { rings: 0.2, stars: 0.9, geo: 0.12, places: 0.16, overlay: 0, routes: 0 },
-  qinhan: { rings: 0, stars: 0.08, geo: 0.55, places: 0.6, overlay: 0.95, routes: 0 },
-  suitang: { rings: 0, stars: 0, geo: 0.6, places: 0.72, overlay: 0.95, routes: 0 },
+  qinhan: { rings: 0, stars: 0.08, geo: 0.55, places: 0.6, overlay: 1, routes: 0 },
+  suitang: { rings: 0, stars: 0, geo: 0.6, places: 0.72, overlay: 1, routes: 0 },
   yujitu: { rings: 0, stars: 0, geo: 0.5, places: 0.85, overlay: 1, routes: 0 },
-  mingchu: { rings: 0, stars: 0, geo: 0.8, places: 0.8, overlay: 0.9, routes: 1 },
-  kunyu: { rings: 0, stars: 0, geo: 0.85, places: 0.9, overlay: 0.95, routes: 0.12 },
+  mingchu: { rings: 0, stars: 0, geo: 0.8, places: 0.8, overlay: 1, routes: 1 },
+  kunyu: { rings: 0, stars: 0, geo: 0.85, places: 0.9, overlay: 1, routes: 0.12 },
 };
 
 const app = document.querySelector<HTMLDivElement>('#app');
@@ -74,7 +75,7 @@ if (!app) throw new Error('App root not found');
 
 const lastEra = Number(localStorage.getItem('yuji-era') ?? 0);
 let currentEra = Number.isFinite(lastEra) && lastEra >= 0 && lastEra < eras.length ? lastEra : 0;
-let overlayOpacity = 1;
+let overlayOpacity = 0;
 let hasStarted = false;
 let searchTerm = '';
 function storytellerOf(eraId: string): Storyteller {
@@ -229,7 +230,7 @@ app.innerHTML = `
           <div class="map-stamp">古今图对照<br />不作现实边界主张</div>
           <button class="expand-button" id="expand-map" aria-label="放大查看地图" title="放大查看地图">⤢</button>
           <button class="compare-button" id="compare-button"><span class="compare-icon">◐</span><span>掀开古今对照</span></button>
-          <div class="overlay-control" id="overlay-control" aria-hidden="true"><div class="overlay-panel"><div class="panel-heading"><div><p class="card-label">古今叠层</p><h3>掀开古图，对照今图</h3></div><button class="close-button" id="close-overlay" aria-label="关闭古今叠层">×</button></div><p id="overlay-desc">古图为已核验的公版原图（禹迹图 / 坤舆万国全图），与今图未做严格配准，仅作视觉叠合；方位与比例的真实差异本身就是历史。</p><label for="opacity-range">向下拖动掀开古图，露出今图 · 古图浓度 <output id="opacity-output">100%</output></label><input id="opacity-range" type="range" min="0" max="100" value="100"/><div class="panel-foot"><span>今图 · Natural Earth 实测地理</span><span>古图 · 传世原图</span></div></div></div>
+          <div class="overlay-control" id="overlay-control" aria-hidden="true"><div class="overlay-panel"><div class="panel-heading"><div><p class="card-label">古今叠层</p><h3>把这一幕的真迹叠上来</h3></div><button class="close-button" id="close-overlay" aria-label="关闭古今叠层">×</button></div><p id="overlay-desc">古图为已核验的公版原图（禹迹图 / 坤舆万国全图），与今图未做严格配准，仅作视觉叠合；方位与比例的真实差异本身就是历史。</p><label for="opacity-range">古图浓度 <output id="opacity-output">60%</output></label><input id="opacity-range" type="range" min="0" max="100" value="60"/><div class="panel-foot"><span>今图 · Natural Earth 实测地理</span><span>古图 · 传世原图</span></div></div></div>
         </div>
 
         <div class="timeline-wrap">
@@ -371,7 +372,7 @@ function applyEraTexts(index: number) {
   }
   timeline.setAttribute('aria-valuenow', String(index));
   document.querySelectorAll<HTMLButtonElement>('.timeline-node').forEach((node, nodeIndex) => node.classList.toggle('is-active', nodeIndex === index));
-  const hints: Record<string, string> = { shangzhou: '向右拖动，看世界从秩序想象中长出来', zhanguo: '星野与奇国：先被想象的世界', qinhan: '郡县成网，无名绘者开始画大地', suitang: '一寸折百里，比例成为语言', yujitu: '计里画方——掀开对照看真迹拓本', mingchu: '针路通四海，看航线驶出图框', kunyu: '世界打开了，地球开始有了弧度' };
+  const hints: Record<string, string> = { shangzhou: '向右拖动，看世界从想象中长出来', zhanguo: '昆仑与奇国：先被想象的世界', qinhan: '郡县成网，海岸线开始清晰', suitang: '一寸折百里，山河更细了', yujitu: '计里画方——点「掀开古今对照」看真迹', mingchu: '针路通四海，看航线驶向非洲', kunyu: '地球张开弧度——点「掀开古今对照」看世界地图' };
   document.querySelector<HTMLElement>('#timeline-hint')!.textContent = hints[era.id] ?? '向右拖动，观察世界变得可测';
   const eraModel = modelByEra[era.id] ?? '服制';
   document.querySelectorAll<HTMLButtonElement>('.model-tab').forEach((tab) => {
@@ -458,20 +459,20 @@ document.querySelector<HTMLButtonElement>('#compare-button')!.addEventListener('
   overlayControl.setAttribute('aria-hidden', 'false');
   const hasRealMap = Boolean(eraOverlayImage[eras[currentEra].id]);
   document.querySelector<HTMLElement>('#overlay-desc')!.textContent = hasRealMap
-    ? '古图为已核验的公版原图，与真实今图（Natural Earth 数据）未做严格配准，仅作视觉叠合；方位与比例的真实差异本身就是历史。'
+    ? '这是本幕的传世真迹（或据公开研究重绘的形势图）。向上拖动滑杆把它叠到今图上对照——古今未做严格配准，方位与比例的真实差异本身就是历史。'
     : '这个时代还没有传世地图。天下以《禹贡》五服的观念图呈现——在地图诞生之前，世界是一种秩序想象，而不是被测量的地面。';
   const range = document.querySelector<HTMLInputElement>('#opacity-range')!;
   range.disabled = !hasRealMap;
-  // 对照模式下古图浓度不低于 90%：一掀开就是主角，向下拖才见今图。
-  if (hasRealMap && overlayOpacity < 0.9) {
-    overlayOpacity = 0.9;
-    range.value = '90';
+  // 打开对照即把真迹叠到 60%：既看清古图，又透出下面的生长世界。
+  if (hasRealMap && overlayOpacity < 0.6) {
+    overlayOpacity = 0.6;
+    range.value = '60';
     applyIntensities(intensityAt(continuousPos));
-    document.querySelector<HTMLOutputElement>('#opacity-output')!.textContent = '90%';
+    document.querySelector<HTMLOutputElement>('#opacity-output')!.textContent = '60%';
   }
 });
-document.querySelector<HTMLButtonElement>('#close-overlay')!.addEventListener('click', () => { overlayControl.classList.remove('is-open'); overlayControl.setAttribute('aria-hidden', 'true'); renderEra(currentEra); });
-overlayControl.addEventListener('click', (event) => { if (event.target === overlayControl) { overlayControl.classList.remove('is-open'); overlayControl.setAttribute('aria-hidden', 'true'); renderEra(currentEra); } });
+document.querySelector<HTMLButtonElement>('#close-overlay')!.addEventListener('click', () => { overlayControl.classList.remove('is-open'); overlayControl.setAttribute('aria-hidden', 'true'); overlayOpacity = 0; document.querySelector<HTMLInputElement>('#opacity-range')!.value = '0'; document.querySelector<HTMLOutputElement>('#opacity-output')!.textContent = '0%'; renderEra(currentEra); });
+overlayControl.addEventListener('click', (event) => { if (event.target === overlayControl) { overlayControl.classList.remove('is-open'); overlayControl.setAttribute('aria-hidden', 'true'); overlayOpacity = 0; document.querySelector<HTMLInputElement>('#opacity-range')!.value = '0'; document.querySelector<HTMLOutputElement>('#opacity-output')!.textContent = '0%'; renderEra(currentEra); } });
 document.querySelector<HTMLInputElement>('#opacity-range')!.addEventListener('input', (event) => {
   overlayOpacity = Number((event.target as HTMLInputElement).value) / 100;
   applyIntensities(intensityAt(continuousPos));
