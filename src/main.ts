@@ -29,14 +29,14 @@ const mapPlaces = [
 ];
 
 // 天下模型与时代的默认对应；用户仍可手动切换。
-const modelByEra: Record<string, string> = { shangzhou: '服制', zhanguo: '想象', qinhan: '郡县', suitang: '画方', yujitu: '画方', mingchu: '针路', kunyu: '地圆' };
+const modelByEra: Record<string, string> = { shangzhou: '服制', zhanguo: '九州', qinhan: '郡县', suitang: '画方', yujitu: '画方', mingchu: '针路', kunyu: '地圆' };
 const modelCopy: Record<string, string> = {
-  服制: '以王畿为中心层层向外，天下首先是一种关系秩序。拖动地图看五服的范围。',
-  想象: '昆仑居中，四海之外皆是奇国——世界先被想象，再被丈量。',
-  郡县: '世界被分成可以管理、丈量和征调的地方单元。',
-  画方: '计里画方，每方折地百里——比例成为地图的语言。',
-  针路: '以罗盘方位与更数记程，海图上每一段航线都有针字为凭。',
-  地圆: '大地不再有边缘，而是一个可以绕行一周的球体。把地图缩小看看。',
+  服制: '以王畿为中心层层向外，天下首先是一种关系秩序。地图上显示五服同心圆的范围。',
+  九州: '《禹贡》划分九州：冀、兖、青、徐、扬、荆、豫、梁、雍。点击地图上的色块看各州。',
+  郡县: '世界被分成可以管理、丈量和征调的地方单元。地图上显示 CHGIS 府级政区示意（邻近分配，非历史实边界）。',
+  画方: '计里画方，每方折地百里——比例成为地图的语言。地图上显示经纬网格。',
+  针路: '以罗盘方位与更数记程，海图上每一段航线都有针字为凭。地图上显示郑和航线。',
+  地圆: '大地不再有边缘，而是一个可以绕行一周的球体。缩小地图看看。',
 };
 
 const eraChar: Record<string, string> = { shangzhou: '商', zhanguo: '海', qinhan: '秦', suitang: '唐', yujitu: '宋', mingchu: '航', kunyu: '明' };
@@ -203,7 +203,7 @@ app.innerHTML = `
             <div class="card-label">制图者引路</div>
             <div class="story-content"><div class="story-avatar">${sealChar(initialStory.name)}</div><div><h3>${initialStory.name}<small class="story-role">${initialStory.role}</small></h3><p>${initialStory.text}</p><small class="story-years">${initialStory.years}</small><small class="story-source">${initialStory.source}</small></div></div>
           </article>
-          <article class="model-card"><div class="card-label">天下模型 · 示意</div><div class="model-switch" role="tablist">${['服制', '想象', '郡县', '画方', '针路', '地圆'].map((model, index) => `<button class="model-tab ${index === 0 ? 'is-active' : ''}" data-model="${model}" role="tab" aria-selected="${index === 0}">${model}</button>`).join('')}</div><p id="model-copy">以中心向外层层展开，天下首先是一种关系秩序。</p></article>
+          <article class="model-card"><div class="card-label">天下模型 · 空间视图</div><div class="model-switch" role="tablist">${['服制', '九州', '郡县', '画方', '针路', '地圆'].map((model, index) => `<button class="model-tab ${index === 0 ? 'is-active' : ''}" data-model="${model}" role="tab" aria-selected="${index === 0}">${model}</button>`).join('')}</div><p id="model-copy">以中心向外层层展开，天下首先是一种关系秩序。点标签切换空间视图。</p></article>
         </div>
       </section>
     </main>
@@ -263,6 +263,7 @@ const map = new maplibregl.Map({
       rings: { type: 'geojson', data: wufuRingsGeojson() },
       grid: { type: 'geojson', data: graticuleGeojson() },
       route: { type: 'geojson', data: ZHENGE_ROUTE },
+      jiuzhou: { type: 'geojson', data: 'geo/jiuzhou.json' },
       yujitu: { type: 'image', url: 'assets/maps/yujitu-1136-loc.jpg', coordinates: YUJITU_COORDS },
     },
     layers: [
@@ -277,6 +278,8 @@ const map = new maplibregl.Map({
       { id: 'coast-line', type: 'line', source: 'coast', paint: { 'line-color': '#f0e8d7', 'line-opacity': 0.4, 'line-width': 1 } },
       { id: 'yujitu-raster', type: 'raster', source: 'yujitu', paint: { 'raster-opacity': 0, 'raster-fade-duration': 0 } },
       { id: 'route-line', type: 'line', source: 'route', paint: { 'line-color': '#4f97a8', 'line-opacity': 0, 'line-width': 2.2, 'line-dasharray': [3, 2] } },
+      { id: 'jiuzhou-fill', type: 'fill', source: 'jiuzhou', paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 0 } },
+      { id: 'jiuzhou-line', type: 'line', source: 'jiuzhou', paint: { 'line-color': '#c5a45b', 'line-opacity': 0, 'line-width': 1.5 } },
     ],
   },
   center: [107, 34],
@@ -488,7 +491,31 @@ function startExperience() {
   hasStarted = true;
   intro.classList.add('is-hidden');
   experience.classList.add('is-visible');
-  setTimeout(() => timeline.focus({ preventScroll: true }), 500);
+  // 导演分镜：①地图以五服环开场（雾中浮现）→ ②时间轴升起 → ③可交互
+  // 注意：不改 currentEra（继续入口依赖已保存的时代）
+  const wrap = document.querySelector<HTMLElement>('.timeline-wrap');
+  const sceneHeader = document.querySelector<HTMLElement>('.scene-header');
+  const bottomGrid = document.querySelector<HTMLElement>('.bottom-grid');
+  if (wrap) { wrap.style.opacity = '0'; wrap.style.transform = 'translateY(28px)'; wrap.style.transition = 'opacity .8s ease, transform .8s ease'; }
+  if (sceneHeader) { sceneHeader.style.opacity = '0'; sceneHeader.style.transition = 'opacity .6s ease'; }
+  if (bottomGrid) { bottomGrid.style.opacity = '0'; bottomGrid.style.transition = 'opacity .6s ease .3s'; }
+  // 第 1 幕：地图上五服环从雾中浮现（800ms）
+  setTimeout(() => {
+    if (styleReady) {
+      map.setPaintProperty('rings-fill', 'fill-opacity', 0.1);
+      map.setPaintProperty('rings-line', 'line-opacity', 0.7);
+    }
+  }, 300);
+  // 第 2 幕：时间轴升起（1500ms）
+  setTimeout(() => {
+    if (sceneHeader) sceneHeader.style.opacity = '1';
+    if (wrap) { wrap.style.opacity = '1'; wrap.style.transform = 'translateY(0)'; }
+  }, 1200);
+  // 第 3 幕：底部卡片淡入（2200ms），聚焦时间轴
+  setTimeout(() => {
+    if (bottomGrid) bottomGrid.style.opacity = '1';
+    timeline.focus({ preventScroll: true });
+  }, 2000);
 }
 
 function setDrawer(drawer: HTMLElement, open: boolean) {
@@ -649,13 +676,53 @@ document.querySelector<HTMLButtonElement>('#reset-timeline')!.addEventListener('
   map.flyTo({ center: [107, 34], zoom: 3.4, duration: 1600 });
   renderEra(0);
 });
+// 天下模型空间视图：每个标签切换地图的视觉重心（飞行+图层强调），不只是改文字。
+function applyModelView(model: string) {
+  document.querySelector<HTMLElement>('#model-copy')!.textContent = modelCopy[model];
+  if (!styleReady) return;
+  const hasLayer = (id: string) => Boolean(map.getLayer(id));
+  const setOp = (id: string, v: number) => { const layer = map.getLayer(id); if (layer) { const prop = layer.type === 'fill' ? 'fill-opacity' : layer.type === 'line' ? 'line-opacity' : 'circle-opacity'; map.setPaintProperty(id, prop, v); } };
+  // 先归零所有模型专属强调
+  if (hasLayer('jiuzhou-fill')) setOp('jiuzhou-fill', 0);
+  if (hasLayer('jiuzhou-line')) setOp('jiuzhou-line', 0);
+  if (hasLayer('jiuzhou-label')) return; // symbol layer 跳过
+  switch (model) {
+    case '服制':
+      map.flyTo({ center: [112.45, 34.62], zoom: 4.2, duration: 1600 });
+      map.setPaintProperty('rings-fill', 'fill-opacity', 0.12);
+      map.setPaintProperty('rings-line', 'line-opacity', 0.8);
+      break;
+    case '九州':
+      map.flyTo({ center: [110, 34], zoom: 3.6, duration: 1600 });
+      if (hasLayer('jiuzhou-fill')) map.setPaintProperty('jiuzhou-fill', 'fill-opacity', 0.28);
+      if (hasLayer('jiuzhou-line')) map.setPaintProperty('jiuzhou-line', 'line-opacity', 0.6);
+      break;
+    case '郡县':
+      map.flyTo({ center: [107, 34], zoom: 3.8, duration: 1600 });
+      if (hasLayer('pref-fill')) map.setPaintProperty('pref-fill', 'fill-opacity', 0.18);
+      break;
+    case '画方':
+      map.flyTo({ center: [110, 33], zoom: 4.0, duration: 1600 });
+      map.setPaintProperty('grid-line', 'line-opacity', 0.7);
+      map.setPaintProperty('grid-line', 'line-color', '#b54832');
+      break;
+    case '针路':
+      map.flyTo({ center: [112, 22], zoom: 3.8, duration: 1800 });
+      map.setPaintProperty('route-line', 'line-opacity', 1);
+      map.setPaintProperty('route-line', 'line-width', 3);
+      break;
+    case '地圆':
+      map.flyTo({ center: [107, 30], zoom: 2.5, duration: 1800 });
+      break;
+  }
+}
+
 document.querySelectorAll<HTMLButtonElement>('.model-tab').forEach((tab) => tab.addEventListener('click', () => {
   document.querySelectorAll<HTMLButtonElement>('.model-tab').forEach((item) => { item.classList.remove('is-active'); item.setAttribute('aria-selected', 'false'); });
   tab.classList.add('is-active');
   tab.setAttribute('aria-selected', 'true');
   const model = tab.dataset.model ?? '服制';
-  document.querySelector<HTMLElement>('#model-copy')!.textContent = modelCopy[model];
-  if (model === '服制') map.flyTo({ center: [112.45, 34.62], zoom: 4.2, duration: 1600 });
+  applyModelView(model);
 }));
 
 timeline.addEventListener('keydown', (event) => { if (event.key === 'ArrowRight') { event.preventDefault(); renderEra(Math.round(continuousPos) + 1); } if (event.key === 'ArrowLeft') { event.preventDefault(); renderEra(Math.round(continuousPos) - 1); } if (event.key === 'Home') { event.preventDefault(); renderEra(0); } if (event.key === 'End') { event.preventDefault(); renderEra(eras.length - 1); } });
