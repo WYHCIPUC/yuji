@@ -77,6 +77,72 @@ sources.forEach((source, index) => {
   });
 });
 
+// 数据层（CHGIS V6 派生、脚本生成）：条目量大，失败项聚合计数、只列前若干示例
+const datasetPath = join(contentDir, 'places-dataset.json');
+check(existsSync(datasetPath), 'places-dataset.json 存在（V2 数据层）');
+if (existsSync(datasetPath)) {
+  const dataset = JSON.parse(readFileSync(datasetPath, 'utf8'));
+  const dsErrors = [];
+  const dsCheck = (cond, msg) => { if (!cond) dsErrors.push(msg); };
+  dsCheck((dataset?._generated ?? '').startsWith('scripts/expand-places.mjs'), 'places-dataset.json 带生成标记（生成物，禁止手改）');
+  dsCheck(Array.isArray(dataset?.places) && dataset.places.length > 0, 'places-dataset.json 的 places 是非空数组');
+  const seenSeat = new Set();
+  (dataset?.places ?? []).forEach((p, index) => {
+    const label = `places-dataset.json 第 ${index + 1} 条（${p?.name ?? '?'}）`;
+    ['name', 'level', 'modern', 'certainty', 'source'].forEach((field) => {
+      dsCheck(isFilled(p?.[field]), `${label} 的 ${field} 为非空字符串`);
+    });
+    dsCheck(['县', '府'].includes(p?.level), `${label} 的 level 属于 县 / 府`);
+    dsCheck(CERTAINTY_LEVELS.includes(p?.certainty), `${label} 的 certainty 属于三级考订口径`);
+    dsCheck((p?.source ?? '').startsWith('CHGIS V6'), `${label} 的 source 标注 CHGIS V6`);
+    dsCheck(Number.isFinite(p?.lng) && p.lng >= 70 && p.lng <= 140, `${label} 的经度在粗框内`);
+    dsCheck(Number.isFinite(p?.lat) && p.lat >= 15 && p.lat <= 52, `${label} 的纬度在粗框内`);
+    dsCheck(Array.isArray(p?.presences) && p.presences.length > 0, `${label} 的 presences 非空`);
+    (p?.presences ?? []).forEach((span, i) => {
+      dsCheck(Number.isInteger(span?.from) && Number.isInteger(span?.to), `${label} 第 ${i + 1} 段存在期为整数年份`);
+      dsCheck(span?.to <= 1602, `${label} 第 ${i + 1} 段存在期止于 1602（叙事红线）`);
+      dsCheck(span?.from <= span?.to, `${label} 第 ${i + 1} 段存在期起止有序`);
+    });
+    if (isFilled(p?.name) && Number.isFinite(p?.lng) && Number.isFinite(p?.lat)) {
+      const key = `${p.name}|${Math.round(p.lng * 100)}|${Math.round(p.lat * 100)}`;
+      if (seenSeat.has(key)) dsCheck(false, `${label} 与其他条目同名同座（名称+坐标须可区分）`);
+      seenSeat.add(key);
+    }
+  });
+  if (dsErrors.length) {
+    dsErrors.slice(0, 10).forEach((m) => console.error(`✗ ${m}`));
+    if (dsErrors.length > 10) console.error(`… 另有 ${dsErrors.length - 10} 项未列出`);
+    failures.push(`places-dataset.json 共 ${dsErrors.length} 项问题`);
+  } else {
+    console.log(`✓ places-dataset.json 数据层校验通过（${dataset.places.length} 条）`);
+    if (dataset.places.length < 2000) console.log(`⚠ 数据层条目 ${dataset.places.length} < 2000 目标（数量以 expand-report.md 为准）`);
+  }
+  check(existsSync(join(root, 'docs', 'expand-report.md')), 'docs/expand-report.md 生成报告存在');
+}
+
+// 府界示意层（Voronoi 派生）：声明与红线校验（要素量大，聚合计数）
+const histPrefPath = join(root, 'public', 'geo', 'hist-pref', 'pref-polygons.json');
+check(existsSync(histPrefPath), 'geo/hist-pref/pref-polygons.json 府界示意层存在');
+if (existsSync(histPrefPath)) {
+  const hist = JSON.parse(readFileSync(histPrefPath, 'utf8'));
+  const hpErrors = [];
+  const hpCheck = (cond, msg) => { if (!cond) hpErrors.push(msg); };
+  hpCheck((hist?.disclaimer ?? '').includes('示意') && (hist?.disclaimer ?? '').includes('不代表任何现实主张'), '府界示意层带「示意重绘、不代表任何现实主张」声明');
+  hpCheck(Array.isArray(hist?.features) && hist.features.length > 0, '府界示意层要素非空');
+  (hist?.features ?? []).forEach((f, index) => {
+    const label = `pref-polygons.json 第 ${index + 1} 要素（${f?.properties?.name ?? '?'}）`;
+    const props = f?.properties ?? {};
+    hpCheck(isFilled(props.name), `${label} 的 name 非空`);
+    hpCheck(Number.isInteger(props.from) && Number.isInteger(props.to) && props.to <= 1602, `${label} 的年份区间合法且止于 1602`);
+  });
+  if (hpErrors.length) {
+    hpErrors.slice(0, 10).forEach((m) => console.error(`✗ ${m}`));
+    failures.push(`pref-polygons.json 共 ${hpErrors.length} 项问题`);
+  } else {
+    console.log(`✓ pref-polygons.json 府界示意层校验通过（${hist.features.length} 要素）`);
+  }
+}
+
 // 示意地图上的可点按地名必须能被查到
 const mainSource = readFileSync(join(root, 'src', 'main.ts'), 'utf8');
 const mapPlacesBlock = mainSource.match(/const mapPlaces = \[([\s\S]*?)\];/);

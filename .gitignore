@@ -5,3 +5,4 @@ release/_check/
 *.tsbuildinfo
 .DS_Store
 .mimosa/
+release/_tmp/
