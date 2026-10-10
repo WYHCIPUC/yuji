@@ -78,8 +78,9 @@ sources.forEach((source, index) => {
 });
 
 // 数据层（CHGIS V6 派生、脚本生成）：条目量大，失败项聚合计数、只列前若干示例
-const datasetPath = join(contentDir, 'places-dataset.json');
-check(existsSync(datasetPath), 'places-dataset.json 存在（V2 数据层）');
+// 文件位于 public/data/（按需 fetch 加载，不进 bundle）
+const datasetPath = join(root, 'public', 'data', 'places-dataset.json');
+check(existsSync(datasetPath), 'places-dataset.json 存在（V2 数据层，public/data/）');
 if (existsSync(datasetPath)) {
   const dataset = JSON.parse(readFileSync(datasetPath, 'utf8'));
   const dsErrors = [];

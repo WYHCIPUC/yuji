@@ -333,6 +333,59 @@ function gradientFor(growth: number): maplibregl.ExpressionSpecification {
 let styleReady = false;
 map.on('style.load', () => { styleReady = true; applyIntensities(intensityAt(continuousPos)); });
 
+// ── CHGIS 数据层（按需加载，不进 bundle）──
+// 县/府治所点：拖动时间轴按年份过滤，「地名像落墨一样浮现」由真实数据密度驱动；
+// 府界示意层：Voronoi 邻近分配派生，UI 强制标注非历史实边界。
+const ERA_YEAR: Record<string, number> = { shangzhou: -1600, zhanguo: -475, qinhan: 2, suitang: 713, yujitu: 1136, mingchu: 1425, kunyu: 1602 };
+function yearAt(pos: number): number {
+  const clamped = Math.max(0, Math.min(eras.length - 1, pos));
+  const lo = Math.floor(clamped);
+  const hi = Math.min(eras.length - 1, lo + 1);
+  const a = ERA_YEAR[eras[lo].id] ?? -1600;
+  const b = ERA_YEAR[eras[hi].id] ?? a;
+  return Math.round(lerp(a, b, clamped - lo));
+}
+type DatasetPlace = { name: string; pinyin: string; level: string; kind: string; modern: string; lng: number; lat: number; presences: { from: number; to: number }[]; source: string; certainty: string; presLoc?: string };
+let datasetPlaces: DatasetPlace[] = [];
+let datasetYearFilter = -99999;
+const yearFilter = (year: number): maplibregl.ExpressionSpecification => ['all', ['<=', ['get', 'from'], year], ['>=', ['get', 'to'], year]] as unknown as maplibregl.ExpressionSpecification;
+
+fetch('data/places-dataset.json').then((r) => r.json()).then((data: { places: DatasetPlace[] }) => {
+  datasetPlaces = data.places;
+  // 展平 presence 区间为点要素（每治所每存在期一个 feature）
+  const features: { type: 'Feature'; properties: { name: string; level: string; from: number; to: number }; geometry: { type: 'Point'; coordinates: [number, number] } }[] = [];
+  for (const p of datasetPlaces) {
+    for (const span of p.presences) {
+      features.push({ type: 'Feature', properties: { name: p.name, level: p.level, from: span.from, to: span.to }, geometry: { type: 'Point', coordinates: [p.lng, p.lat] } });
+    }
+  }
+  // 等待样式就绪后添加图层（style.load 可能已在 fetch 期间触发过，故轮询）
+  const waitForStyle = () => {
+    if (map.isStyleLoaded()) {
+      if (!map.getSource('chgis-points')) {
+        map.addSource('chgis-points', { type: 'geojson', data: { type: 'FeatureCollection', features } });
+        map.addSource('chgis-pref', { type: 'geojson', data: 'geo/hist-pref/pref-polygons.json' });
+        map.addLayer({ id: 'pref-fill', type: 'fill', source: 'chgis-pref', filter: yearFilter(datasetYearFilter), paint: { 'fill-color': '#c5a45b', 'fill-opacity': 0.05, 'fill-outline-color': 'rgba(197,164,91,.18)' } }, 'rings-line');
+        map.addLayer({ id: 'cnty-points', type: 'circle', source: 'chgis-points', filter: yearFilter(datasetYearFilter), paint: { 'circle-color': '#e8d9a0', 'circle-opacity': 0.5, 'circle-radius': 1.7 } });
+        map.addLayer({ id: 'pref-points', type: 'circle', source: 'chgis-points', filter: yearFilter(datasetYearFilter), paint: { 'circle-color': '#cf5a41', 'circle-opacity': 0.55, 'circle-radius': 3 } });
+        applyIntensities(intensityAt(continuousPos));
+      }
+    } else {
+      window.setTimeout(waitForStyle, 400);
+    }
+  };
+  waitForStyle();
+}).catch(() => { console.warn('CHGIS 数据层未加载（离线或网络受限）'); });
+
+function applyDatasetYear(year: number) {
+  if (year === datasetYearFilter || !map.getSource('chgis-points')) return;
+  datasetYearFilter = year;
+  const f = yearFilter(year);
+  map.setFilter('cnty-points', f);
+  map.setFilter('pref-points', f);
+  if (map.getLayer('pref-fill')) map.setFilter('pref-fill', f);
+}
+
 function applyIntensities(v: EraIntensity) {
   starsLayer.style.opacity = String(v.stars);
   markerEls.forEach((el) => { el.style.opacity = String(v.places); el.style.pointerEvents = v.places > 0.3 ? 'auto' : 'none'; });
@@ -349,6 +402,10 @@ function applyIntensities(v: EraIntensity) {
   map.setPaintProperty('grow-rivers', 'line-opacity', Math.min(1, v.geo * 1.6));
   map.setPaintProperty('grow-rivers', 'line-gradient', gradientFor(growth));
   map.setPaintProperty('yujitu-raster', 'raster-opacity', overlayOpacity * v.overlay);
+  applyDatasetYear(yearAt(continuousPos));
+  if (map.getLayer('cnty-points')) map.setPaintProperty('cnty-points', 'circle-opacity', 0.55 * v.places);
+  if (map.getLayer('pref-points')) map.setPaintProperty('pref-points', 'circle-opacity', 0.6 * v.places);
+  if (map.getLayer('pref-fill')) map.setPaintProperty('pref-fill', 'fill-opacity', 0.07 * v.geo);
 }
 
 // 各节点圆心在轨道上的百分比（视口实测），用于游标/进度条的连续定位。
@@ -455,9 +512,20 @@ function renderResults(term = '') {
     matches.push(item.place);
     if (matches.length >= 8) break;
   }
+  // 数据层补充（CHGIS）：排除叙事层同名，最多再给 12 条精简卡
+  const narrativeNames = new Set(places.map((p: Place) => p.name));
+  const datasetMatches: DatasetPlace[] = normalized
+    ? datasetPlaces.filter((p) => `${p.name}${p.pinyin}${p.modern}`.toLowerCase().includes(normalized) && !narrativeNames.has(p.name)).slice(0, 12)
+    : [];
   searchSuggestions.innerHTML = normalized ? '' : '<span>试试</span>' + places.slice(0, 5).map((place: Place) => `<button class="suggestion" data-place="${place.name}">${place.name}</button>`).join('');
   const locatable = new Set(mapPlaces.map((item) => item.name));
-  searchResults.innerHTML = matches.length ? matches.map((place: Place) => `<article class="place-result" tabindex="0"><div class="place-heading"><h4>${place.name}</h4><span>${place.modern}</span></div><div class="place-chain">${place.chain.map((name) => `<span class="chain-item ${name === place.name ? 'is-current' : ''}">${name}</span>`).join('<i>→</i>')}</div><p>${place.note}</p><div class="place-meta"><span>${place.certainty}</span><span>${place.era}</span></div>${locatable.has(place.name) ? `<button class="locate-button" data-locate="${place.name}"><span>◎</span>在图上定位</button>` : ''}<small>来源：${place.source}</small></article>`).join('') : '<div class="empty-state"><span class="empty-mark">⌁</span><strong>还没有找到这个地名</strong><p>当前收录 20 条示例地名。你可以试试“燕京”或“临安”。</p></div>';
+  const narrativeHtml = matches.map((place: Place) => `<article class="place-result" tabindex="0"><div class="place-heading"><h4>${place.name}</h4><span>${place.modern}</span></div><div class="place-chain">${place.chain.map((name) => `<span class="chain-item ${name === place.name ? 'is-current' : ''}">${name}</span>`).join('<i>→</i>')}</div><p>${place.note}</p><div class="place-meta"><span>${place.certainty}</span><span>${place.era}</span></div>${locatable.has(place.name) ? `<button class="locate-button" data-locate="${place.name}"><span>◎</span>在图上定位</button>` : ''}<small>来源：${place.source}</small></article>`).join('');
+  const spans = (p: DatasetPlace) => p.presences.map((s) => (s.from < 0 ? `前 ${-s.from}` : `${s.from}`) + '—' + (s.to < 0 ? `前 ${-s.to}` : `${s.to}`)).join('、');
+  const datasetHtml = datasetMatches.map((p) => `<article class="place-result is-dataset" tabindex="0"><div class="place-heading"><h4>${p.name}</h4><span>${p.modern}</span></div><div class="place-meta"><span>${p.level} · ${p.kind}</span><span>存在期：${spans(p)}</span></div><button class="locate-button" data-locate="${p.name}"><span>◎</span>在图上定位</button><small>来源：${p.source}（治所点位为示意精度）</small></article>`).join('');
+  const datasetNote = datasetMatches.length ? `<p class="dataset-note">另有 ${datasetMatches.length} 条来自 CHGIS V6 数据层（县级/府级治所沿革，前 221—1602）</p>` : '';
+  searchResults.innerHTML = narrativeHtml || datasetHtml
+    ? narrativeHtml + datasetNote + datasetHtml
+    : '<div class="empty-state"><span class="empty-mark">⌁</span><strong>还没有找到这个地名</strong><p>叙事层收录 20 条精选考订，数据层收录 CHGIS 治所沿革 9440 条。你可以试试“燕京”“临安”或任一古县名。</p></div>';
 }
 
 document.querySelector<HTMLButtonElement>('#start-button')!.addEventListener('click', startExperience);
@@ -529,8 +597,11 @@ searchResults.addEventListener('click', (event) => {
   const name = target.dataset.locate ?? '';
   setDrawer(searchDrawer, false);
   const place = mapPlaces.find((item) => item.name === name);
-  if (!place) return;
-  map.flyTo({ center: [place.lng, place.lat], zoom: Math.max(map.getZoom(), 4.8), duration: 2200, essential: true });
+  const dataset = place ? undefined : datasetPlaces.find((p) => p.name === name);
+  const lng = place ? place.lng : dataset?.lng;
+  const lat = place ? place.lat : dataset?.lat;
+  if (lng === undefined || lat === undefined) return;
+  map.flyTo({ center: [lng, lat], zoom: Math.max(map.getZoom(), 5.4), duration: 2200, essential: true });
   const el = markerEls.get(name);
   if (el) {
     el.classList.remove('is-pulse');

@@ -29,6 +29,18 @@ try {
   await page.waitForFunction(() => window.__yujiMap && window.__yujiMap.isStyleLoaded(), null, { timeout: 20000 }).catch(() => {});
   check(await page.evaluate(() => Boolean(window.__yujiMap && window.__yujiMap.isStyleLoaded())), '地图引擎样式已加载');
   check(await page.evaluate(() => Boolean(window.__yujiMap.getLayer('grow-rivers') && window.__yujiMap.getLayer('yujitu-raster') && window.__yujiMap.getLayer('rings-line') && window.__yujiMap.getLayer('route-line'))), '生长河流/禹迹图配准/五服环/针路图层都在');
+  // CHGIS 数据层（9440 条治所点 + 府界示意层）
+  await page.waitForFunction(() => Boolean(window.__yujiMap.getSource('chgis-points')), null, { timeout: 20000 }).catch(() => {});
+  check(await page.evaluate(() => Boolean(window.__yujiMap.getSource('chgis-points'))), 'CHGIS 治所点数据层已加载');
+  check(await page.evaluate(() => Boolean(window.__yujiMap.getSource('chgis-pref'))), 'CHGIS 府界示意层数据已加载');
+  await page.locator('.timeline-node[data-index="6"]').click();
+  await page.waitForTimeout(1200);
+  const qingCount = await page.evaluate(() => window.__yujiMap.queryRenderedFeatures({ layers: ['cnty-points', 'pref-points'] }).length);
+  check(qingCount > 100, `1602 年治所点大量可见（${qingCount} 个）`);
+  await page.locator('.timeline-node[data-index="0"]').click();
+  await page.waitForTimeout(1200);
+  const shangCount = await page.evaluate(() => window.__yujiMap.queryRenderedFeatures({ layers: ['cnty-points', 'pref-points'] }).length);
+  check(shangCount < qingCount, `商周治所点远少于 1602（前 ${shangCount} < 后 ${qingCount}，数据随时代增长）`);
 
   await page.locator('.timeline-node[data-index="1"]').click();
   check(await page.locator('.app-shell').getAttribute('data-era') === 'zhanguo', '点击战国后时代状态正确');
@@ -75,6 +87,12 @@ try {
   await page.locator('#place-search').fill('燕京');
   check((await page.locator('.place-result').first().textContent()).includes('北京'), '地名查询返回今地对应');
   check(await page.locator('.place-result').count() > 0, '地名卡已渲染');
+  // CHGIS 数据层：古县名命中数据层条目
+  await page.waitForFunction(() => document.querySelectorAll('.place-result').length > 0 || true, null, { timeout: 8000 }).catch(() => {});
+  await page.locator('#place-search').fill('钱塘');
+  await page.waitForTimeout(600);
+  const datasetHit = await page.locator('.place-result.is-dataset').count();
+  check(datasetHit > 0 || (await page.locator('.place-result').first().textContent()).includes('杭州'), '「钱塘」命中叙事层或 CHGIS 数据层');
   // 在图上定位：地图飞向该地
   const before = await page.evaluate(() => JSON.stringify(window.__yujiMap.getCenter()));
   await page.locator('.locate-button').first().click();
@@ -82,6 +100,9 @@ try {
   const after = await page.evaluate(() => JSON.stringify(window.__yujiMap.getCenter()));
   check(before !== after, '「在图上定位」让地图飞向该地');
   await page.keyboard.press('Escape');
+  // 重置视图（否则北京标记在视口外）
+  await page.evaluate(() => window.__yujiMap.jumpTo({ center: [107, 34], zoom: 3.4 }));
+  await page.waitForTimeout(600);
 
   await page.locator('.map-place[data-place="燕京"]').click();
   check(await page.locator('#search-drawer').evaluate((node) => node.classList.contains('is-open')), '点按地图地名可以打开查询抽屉');

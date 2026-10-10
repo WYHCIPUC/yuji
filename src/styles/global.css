@@ -229,6 +229,8 @@ input[type='range']::-moz-range-thumb { width: 16px; height: 16px; border-radius
 .place-meta span, .source-status { padding: 3px 6px; border: 1px solid rgba(197,164,91,.35); border-radius: 3px; color: var(--gold); font-size: 11px; }
 .place-meta span:last-child { color: var(--muted); border-color: var(--line-strong); }
 .place-result small { color: var(--muted-dark); font-size: 11px; line-height: 1.5; display: block; margin-top: 9px; }
+.place-result.is-dataset { border-style: dashed; }
+.dataset-note { margin: 4px 0 10px; color: var(--muted-dark); font-size: 11px; }
 .locate-button { display: inline-flex; gap: 6px; align-items: center; margin-top: 12px; padding: 6px 11px; border: 1px solid rgba(181, 72, 50, .55); border-radius: var(--radius-pill); color: var(--vermilion-bright); background: rgba(181, 72, 50, .08); cursor: pointer; font-size: 11px; letter-spacing: .08em; transition: background var(--dur-fast) ease, border-color var(--dur-fast) ease; }
 .locate-button:hover { background: rgba(181, 72, 50, .2); border-color: var(--vermilion-bright); }
 .locate-button span { font-size: 12px; }
