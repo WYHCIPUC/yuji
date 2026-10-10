@@ -41,13 +41,30 @@ const modelCopy: Record<string, string> = {
 
 const eraChar: Record<string, string> = { shangzhou: '商', zhanguo: '海', qinhan: '秦', suitang: '唐', yujitu: '宋', mingchu: '航', kunyu: '明' };
 
-// 每一幕的真迹/图件（对照面板与放大查看用；禹迹图另做地理配准叠加）。
+// 每一幕的真迹/图件（对照面板与放大查看用；禹迹图/秦图/唐图另做地理配准叠加）。
 const eraOverlayImage: Record<string, { src: string; caption: string }> = {
   qinhan: { src: 'assets/maps/atlas/qin.jpg', caption: '秦疆域图（前 221 年）· 重绘 · CC BY-SA' },
   suitang: { src: 'assets/maps/atlas/tang660.jpg', caption: '唐帝国与都护府（约 660 年）· 重绘 · CC0' },
   yujitu: { src: 'assets/maps/yujitu-1136-loc.jpg', caption: '《禹迹图》1136 年石刻拓本（已按真实位置叠加）' },
   mingchu: { src: 'assets/maps/atlas/maokun-sumatra.jpg', caption: '《郑和航海图》苏门答腊段 · 《武备志》· 公有领域' },
   kunyu: { src: 'assets/maps/kunyu-wanguo-1602.jpg', caption: '《坤舆万国全图》 · 1602 · 公有领域' },
+};
+
+// 地理配准的古图（image source 四角坐标）：拖动滑杆叠上来
+// 坐标为近似粗配准（Natural Earth 重绘图基于同一投影，对齐度较高）
+const ERA_GEOREF: Record<string, { coords: [[number, number], [number, number], [number, number], [number, number]]; caption: string }> = {
+  qinhan: {
+    coords: [[98, 42.5], [126, 42.5], [126, 19], [98, 19]],
+    caption: '秦疆域图（前 221 年）· 已按地理位置粗叠加',
+  },
+  suitang: {
+    coords: [[72, 48], [128, 48], [128, 19], [72, 19]],
+    caption: '唐帝国与都护府（约 660 年）· 已按地理位置粗叠加',
+  },
+  yujitu: {
+    coords: [[97.5, 42.5], [126.5, 42.5], [126.5, 17.5], [97.5, 17.5]] as [[number, number], [number, number], [number, number], [number, number]],
+    caption: '《禹迹图》拓本 · 已按地理位置叠加',
+  },
 };
 
 // 七幕「生长」强度：拖动时间轴时相邻两幕连续插值——想象淡出、实测淡入。
@@ -269,6 +286,8 @@ const map = new maplibregl.Map({
       route: { type: 'geojson', data: ZHENGE_ROUTE },
       jiuzhou: { type: 'geojson', data: 'geo/jiuzhou.json' },
       yujitu: { type: 'image', url: 'assets/maps/yujitu-1136-loc.jpg', coordinates: YUJITU_COORDS },
+      qinmap: { type: 'image', url: 'assets/maps/atlas/qin.jpg', coordinates: ERA_GEOREF.qinhan.coords },
+      tangmap: { type: 'image', url: 'assets/maps/atlas/tang660.jpg', coordinates: ERA_GEOREF.suitang.coords },
     },
     layers: [
       { id: 'bg', type: 'background', paint: { 'background-color': '#141311' } },
@@ -281,6 +300,8 @@ const map = new maplibregl.Map({
       { id: 'grow-rivers', type: 'line', source: 'grow', paint: { 'line-color': '#7eaaa3', 'line-width': 1.8, 'line-gradient': ['interpolate', ['linear'], ['line-progress'], 0, 'rgba(126,170,163,0)', 0.001, '#7eaaa3', 1, '#7eaaa3'] } },
       { id: 'coast-line', type: 'line', source: 'coast', paint: { 'line-color': '#f0e8d7', 'line-opacity': 0.4, 'line-width': 1 } },
       { id: 'yujitu-raster', type: 'raster', source: 'yujitu', paint: { 'raster-opacity': 0, 'raster-fade-duration': 0 } },
+      { id: 'qin-raster', type: 'raster', source: 'qinmap', paint: { 'raster-opacity': 0, 'raster-fade-duration': 0 } },
+      { id: 'tang-raster', type: 'raster', source: 'tangmap', paint: { 'raster-opacity': 0, 'raster-fade-duration': 0 } },
       { id: 'route-line', type: 'line', source: 'route', paint: { 'line-color': '#4f97a8', 'line-opacity': 0, 'line-width': 2.2, 'line-dasharray': [3, 2] } },
       { id: 'jiuzhou-fill', type: 'fill', source: 'jiuzhou', paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 0 } },
       { id: 'jiuzhou-line', type: 'line', source: 'jiuzhou', paint: { 'line-color': '#c5a45b', 'line-opacity': 0, 'line-width': 1.5 } },
@@ -417,6 +438,22 @@ function applyDatasetYear(year: number) {
   if (map.getLayer('pref-fill')) map.setFilter('pref-fill', f);
 }
 
+// 郑和针路逐段动画：明初幕时虚线流动
+let routeAnimTimer: number | null = null;
+function startRouteAnimation() {
+  if (routeAnimTimer !== null) return;
+  let phase = 0;
+  routeAnimTimer = window.setInterval(() => {
+    if (!styleReady || !map.getLayer('route-line')) return;
+    phase = (phase + 1) % 6;
+    map.setPaintProperty('route-line', 'line-dasharray', [3 + phase * 0.5, 2]);
+  }, 220);
+}
+function stopRouteAnimation() {
+  if (routeAnimTimer !== null) { window.clearInterval(routeAnimTimer); routeAnimTimer = null; }
+  if (styleReady && map.getLayer('route-line')) map.setPaintProperty('route-line', 'line-dasharray', [3, 2]);
+}
+
 function applyIntensities(v: EraIntensity) {
   starsLayer.style.opacity = String(v.stars);
   markerEls.forEach((el) => { el.style.opacity = String(v.places); el.style.pointerEvents = v.places > 0.3 ? 'auto' : 'none'; });
@@ -432,11 +469,14 @@ function applyIntensities(v: EraIntensity) {
   map.setPaintProperty('route-line', 'line-opacity', 0.9 * v.routes);
   map.setPaintProperty('grow-rivers', 'line-opacity', Math.min(1, v.geo * 1.6));
   map.setPaintProperty('grow-rivers', 'line-gradient', gradientFor(growth));
-  map.setPaintProperty('yujitu-raster', 'raster-opacity', overlayOpacity * v.overlay);
+  map.setPaintProperty('yujitu-raster', 'raster-opacity', eras[Math.round(continuousPos)]?.id === 'yujitu' ? overlayOpacity * v.overlay : 0);
+  map.setPaintProperty('qin-raster', 'raster-opacity', eras[Math.round(continuousPos)]?.id === 'qinhan' ? overlayOpacity * v.overlay : 0);
+  map.setPaintProperty('tang-raster', 'raster-opacity', eras[Math.round(continuousPos)]?.id === 'suitang' ? overlayOpacity * v.overlay : 0);
   applyDatasetYear(yearAt(continuousPos));
   if (map.getLayer('cnty-points')) map.setPaintProperty('cnty-points', 'circle-opacity', 0.55 * v.places);
   if (map.getLayer('pref-points')) map.setPaintProperty('pref-points', 'circle-opacity', 0.6 * v.places);
   if (map.getLayer('pref-fill')) map.setPaintProperty('pref-fill', 'fill-opacity', 0.07 * v.geo);
+  if (v.routes > 0.3) startRouteAnimation(); else stopRouteAnimation();
 }
 
 // 各节点圆心在轨道上的百分比（视口实测），用于游标/进度条的连续定位。
@@ -634,17 +674,18 @@ document.querySelector<HTMLButtonElement>('#compare-button')!.addEventListener('
   const eraId = eras[currentEra].id;
   const hasRealMap = Boolean(eraOverlayImage[eraId]);
   const desc = document.querySelector<HTMLElement>('#overlay-desc')!;
-  if (eraId === 'yujitu') {
-    desc.innerHTML = '<img src="assets/maps/yujitu-1136-loc.jpg" alt="禹迹图拓本" class="overlay-thumb"/><br/>《禹迹图》拓本已按真实地理位置叠加到现代地图上（粗配准）。拖动滑杆看古今长江、黄河的走向差异——宋人的海岸线与现代实测相差之处，本身就是历史。';
+  if (ERA_GEOREF[eraId]) {
+    const georef = ERA_GEOREF[eraId];
+    desc.innerHTML = `<img src="${eraOverlayImage[eraId].src}" alt="${georef.caption}" class="overlay-thumb"/><br/><strong>${georef.caption}</strong><br/>拖动滑杆把图件叠加到现代地图上——古今未做严格配准，方位与比例的真实差异本身就是历史。`;
   } else if (hasRealMap) {
     const img = eraOverlayImage[eraId];
-    desc.innerHTML = `<img src="${img.src}" alt="${img.caption}" class="overlay-thumb"/><br/><strong>${img.caption}</strong><br/>此图件未做地理配准（与底图坐标系不同），在地图上做整体视觉对照。点「在图上定位」任意治所可回到精确位置。`;
+    desc.innerHTML = `<img src="${img.src}" alt="${img.caption}" class="overlay-thumb"/><br/><strong>${img.caption}</strong><br/>此图件为传统投影（非现代坐标系），在面板中做整体对照查看。点「本幕图卷」中的缩略图可放大。`;
   } else {
     desc.textContent = '这个时代还没有传世地图。天下以《禹贡》五服的观念呈现——在地图诞生之前，世界是一种秩序想象，而不是被测量的地面。';
   }
   const range = document.querySelector<HTMLInputElement>('#opacity-range')!;
-  range.disabled = false;
-  if (eraId === 'yujitu' && overlayOpacity < 0.6) {
+  range.disabled = !hasRealMap;
+  if (ERA_GEOREF[eraId] && overlayOpacity < 0.6) {
     overlayOpacity = 0.6;
     range.value = '60';
     applyIntensities(intensityAt(continuousPos));
@@ -654,7 +695,7 @@ document.querySelector<HTMLButtonElement>('#compare-button')!.addEventListener('
 function closeOverlay() {
   overlayControl.classList.remove('is-open');
   overlayControl.setAttribute('aria-hidden', 'true');
-  if (eras[currentEra].id === 'yujitu') {
+  if (ERA_GEOREF[eras[currentEra].id]) {
     overlayOpacity = 0;
     const range = document.querySelector<HTMLInputElement>('#opacity-range')!;
     range.value = '0';
@@ -667,7 +708,7 @@ overlayControl.addEventListener('click', (event) => { if (event.target === overl
 document.querySelector<HTMLInputElement>('#opacity-range')!.addEventListener('input', (event) => {
   const value = Number((event.target as HTMLInputElement).value);
   overlayOpacity = value / 100;
-  if (eras[currentEra].id !== 'yujitu') overlayOpacity = 0; // 仅禹迹图做配准叠加
+  if (!ERA_GEOREF[eras[currentEra].id]) overlayOpacity = 0; // 仅配准图可调浓度
   applyIntensities(intensityAt(continuousPos));
   document.querySelector<HTMLOutputElement>('#opacity-output')!.textContent = `${value}%`;
 });
