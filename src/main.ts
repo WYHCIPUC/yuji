@@ -204,6 +204,10 @@ app.innerHTML = `
             <div class="story-content"><div class="story-avatar">${sealChar(initialStory.name)}</div><div><h3>${initialStory.name}<small class="story-role">${initialStory.role}</small></h3><p>${initialStory.text}</p><small class="story-years">${initialStory.years}</small><small class="story-source">${initialStory.source}</small></div></div>
           </article>
           <article class="model-card"><div class="card-label">天下模型 · 空间视图</div><div class="model-switch" role="tablist">${['服制', '九州', '郡县', '画方', '针路', '地圆'].map((model, index) => `<button class="model-tab ${index === 0 ? 'is-active' : ''}" data-model="${model}" role="tab" aria-selected="${index === 0}">${model}</button>`).join('')}</div><p id="model-copy">以中心向外层层展开，天下首先是一种关系秩序。点标签切换空间视图。</p></article>
+          <article class="atlas-pick-card" id="atlas-pick-card">
+            <div class="card-label">本幕图卷 <button class="text-button atlas-all" id="atlas-all-btn">全部 49 幅 ↗</button></div>
+            <div class="atlas-picks" id="atlas-picks"></div>
+          </article>
         </div>
       </section>
     </main>
@@ -378,7 +382,31 @@ fetch('data/places-dataset.json').then((r) => r.json()).then((data: { places: Da
     }
   };
   waitForStyle();
+  // CHGIS 治所点可点按：弹窗显示地名、层级与存在期
+  map.on('click', 'cnty-points', (e) => {
+    const f = e.features?.[0];
+    if (!f) return;
+    const props = f.properties as { name: string; level: string; from: number; to: number };
+    showSeatPopup(e.lngLat, props);
+  });
+  map.on('click', 'pref-points', (e) => {
+    const f = e.features?.[0];
+    if (!f) return;
+    const props = f.properties as { name: string; level: string; from: number; to: number };
+    showSeatPopup(e.lngLat, props);
+  });
+  map.getCanvas().style.cursor = 'pointer';
 }).catch(() => { console.warn('CHGIS 数据层未加载（离线或网络受限）'); });
+
+function showSeatPopup(lngLat: maplibregl.LngLat, props: { name: string; level: string; from: number; to: number }) {
+  const span = props.from < 0 ? `前 ${-props.from}` : `${props.from}` + '—' + (props.to < 0 ? `前 ${-props.to}` : `${props.to}`);
+  const el = document.createElement('div');
+  el.className = 'seat-popup';
+  el.innerHTML = `<strong>${props.name}</strong><span>${props.level}级治所</span><small>存在期 ${span} 年</small>`;
+  new maplibregl.Marker({ element: el, anchor: 'bottom' }).setLngLat(lngLat).addTo(map);
+  window.setTimeout(() => { el.style.opacity = '0'; window.setTimeout(() => el.remove(), 400); }, 2600);
+  el.style.opacity = '1';
+}
 
 function applyDatasetYear(year: number) {
   if (year === datasetYearFilter || !map.getSource('chgis-points')) return;
@@ -463,7 +491,44 @@ function applyEraTexts(index: number) {
   });
   document.querySelector<HTMLElement>('#model-copy')!.textContent = modelCopy[eraModel];
   localStorage.setItem('yuji-era', String(index));
+  renderAtlasPicks(era.id);
 }
+
+// ── 本幕图卷：按时代自动筛选 atlas.json 中的相关图件，展示在地图下方 ──
+const ERA_ATLAS_IDS: Record<string, string[]> = {
+  shangzhou: ['shang', 'zhou'],
+  zhanguo: ['zhanguo', 'zhaoyutu'],
+  qinhan: ['qin', 'mawangdui-topo', 'mawangdui-mil', 'xihan'],
+  suitang: ['tang660', 'tang', 'tang-cn', 'dunhuang-star'],
+  yujitu: ['yujitu-artifact', 'huayitu-artifact', 'dilitu', 'pingjiang', 'nansong'],
+  mingchu: ['maokun-malacca', 'maokun-ceylon', 'maokun-sumatra', 'daminghunyi', 'kangnido'],
+  kunyu: ['kunyu-artifact', 'guangyu', 'guangyu-fujian', 'homann1735', 'qing', 'kangxi-zhili'],
+};
+function renderAtlasPicks(eraId: string) {
+  const picksEl = document.querySelector<HTMLElement>('#atlas-picks');
+  if (!picksEl) return;
+  const ids = ERA_ATLAS_IDS[eraId] ?? [];
+  const picks = (atlas as AtlasItem[]).filter((item) => ids.includes(item.id));
+  picksEl.innerHTML = picks.length ? picks.map((item) => {
+    const badge = item.type === '存世图件' ? 'is-artifact' : item.type === '近代出版图件' ? 'is-early' : '';
+    return `<button class="atlas-pick" data-atlas="${item.id}" title="${item.note ?? item.period}">
+      <img src="${item.file}" alt="${item.period}" loading="lazy"/>
+      <span class="atlas-pick-caption"><b>${item.years}</b> ${item.period}<em class="atlas-type ${badge}">${item.type}</em></span>
+    </button>`;
+  }).join('') : '';
+}
+document.addEventListener('click', (event) => {
+  const btn = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-atlas]');
+  if (!btn) return;
+  const id = btn.dataset.atlas;
+  const item = (atlas as AtlasItem[]).find((a) => a.id === id);
+  if (!item) return;
+  lightboxBody.innerHTML = `<figure class="lightbox-figure"><img src="${item.file}" alt="${item.period} ${item.years}"/><figcaption><strong>${item.period}</strong> · ${item.years} · ${item.type}<br/>${item.note ?? ''}<br/><small>${item.author} · ${item.license}</small></figcaption></figure>`;
+  mapLightbox.classList.add('is-open');
+  mapLightbox.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('drawer-open');
+});
+document.querySelector<HTMLButtonElement>('#atlas-all-btn')?.addEventListener('click', () => setDrawer(atlasDrawer, true));
 
 function setTimelineCursor(pos: number) {
   const aligned = alignedAt(pos);
@@ -570,9 +635,10 @@ document.querySelector<HTMLButtonElement>('#compare-button')!.addEventListener('
   const hasRealMap = Boolean(eraOverlayImage[eraId]);
   const desc = document.querySelector<HTMLElement>('#overlay-desc')!;
   if (eraId === 'yujitu') {
-    desc.textContent = '《禹迹图》拓本已按真实地理位置叠加到现代地图上（粗配准）。拖动滑杆看古今长江、黄河的走向差异——宋人的海岸线与现代实测相差之处，本身就是历史。';
+    desc.innerHTML = '<img src="assets/maps/yujitu-1136-loc.jpg" alt="禹迹图拓本" class="overlay-thumb"/><br/>《禹迹图》拓本已按真实地理位置叠加到现代地图上（粗配准）。拖动滑杆看古今长江、黄河的走向差异——宋人的海岸线与现代实测相差之处，本身就是历史。';
   } else if (hasRealMap) {
-    desc.textContent = '这是本幕的图件。除《禹迹图》外的图件未做地理配准，拖动滑杆以整体对照查看。';
+    const img = eraOverlayImage[eraId];
+    desc.innerHTML = `<img src="${img.src}" alt="${img.caption}" class="overlay-thumb"/><br/><strong>${img.caption}</strong><br/>此图件未做地理配准（与底图坐标系不同），在地图上做整体视觉对照。点「在图上定位」任意治所可回到精确位置。`;
   } else {
     desc.textContent = '这个时代还没有传世地图。天下以《禹贡》五服的观念呈现——在地图诞生之前，世界是一种秩序想象，而不是被测量的地面。';
   }
